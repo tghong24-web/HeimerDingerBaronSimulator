@@ -1,4 +1,4 @@
 /**
- * 피해 공식(DamageCalculator)과 시간에 따른 바론 스탯(BaronScaler). ui를 참조하지 않는다.
+ * 성장 공식(StatGrowth)과 바론스탯
  */
 package com.hongtg.baronsim.calc;

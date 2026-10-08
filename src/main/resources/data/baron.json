@@ -1,11 +1,14 @@
 {
     "patch": "26.20",
-    "spawnTime": 1200,
-    "baseHealth": 15900,
-    "healthPerMinute": 180,
-    "armor": 120,
-    "magicResist": 70,
-    "attackDamage":400,
-    "attackPerMinute": 10,
-    "attackSpeed": 0.63
+    "spawnTimeSeconds": 1200,
+    "minLevel": 11,
+    "maxLevel": 18,
+    "health":       { "base": 16300, "perLevel": 170 },
+    "attackDamage": { "base": 175,   "perLevel": 20 },
+    "armor":        { "base": 34,    "perLevel": 8 },
+    "magicResist":  { "base": 32,    "perLevel": 4 },
+    "attackSpeed": 0.625,
+    "healthRegen": 0,
+    "gaze": { "damageReduction": 0.5, "durationSeconds": 8 },
+    "voidCorruption": { "resistReductionPerStack": 0.5, "maxStacks": 100, "durationSeconds": 8 }
 }
