@@ -1,19 +1,32 @@
 package com.hongtg.baronsim.calc;
 
-import org.junit.jupiter.api.Disabled;
+import com.hongtg.baronsim.model.BaronStats;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * 구현 1단계(BaronScaler)의 테스트 자리.
- * 연습 모드에서 잰 값을 여기에 고정한다.
- */
 class BaronScalerTest {
 
+    private BaronScaler scaler;
+
+    @BeforeEach
+    void setUp() {
+        scaler = new BaronScaler(
+                new StatGrowth(16300, 170),
+                new StatGrowth(175, 20),
+                0.625,
+                new StatGrowth(34, 8),
+                new StatGrowth(32, 4));
+    }
+
     @Test
-    @Disabled("BaronScaler 구현 후 실측값으로 채운다")
-    void baronHealthAtTwentyMinutes() {
-        fail("연습 모드에서 20분 바론 체력을 확인해 기대값으로 넣기");
+    void healthAtLevel15() {
+        BaronStats stats = scaler.statsAt(15);
+        assertEquals(18555.05, stats.health(), 0.01);  
+        assertEquals(440.3, stats.attackDamage(), 0.01);
+        assertEquals(0.625, stats.attackSpeed(), 0.01);
+        assertEquals(140.12, stats.armor(), 0.01);
+        assertEquals(85.06, stats.magicResist(), 0.01);
     }
 }
