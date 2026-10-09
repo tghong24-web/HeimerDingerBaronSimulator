@@ -31,10 +31,13 @@ class BaronScalerTest {
         assertEquals(140.12, stats.armor(), 0.01);
         assertEquals(85.06, stats.magicResist(), 0.01);
     }
+    @Test
     void rejectsLevelBelowMinimum() {
         assertThrows(IllegalArgumentException.class, () -> scaler.statsAt(10));
     }
-    void rejectsLevelAbobeMaximum() {
+    
+    @Test
+    void rejectsLevelAboveMaximum() {
         assertThrows(IllegalArgumentException.class, () -> scaler.statsAt(19));
     }
 }
