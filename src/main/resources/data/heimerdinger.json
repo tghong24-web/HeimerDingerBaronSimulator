@@ -1,0 +1,39 @@
+{
+    "patch": "26.20",
+    "source": "wiki.leagueoflegends.com/en-us/Heimerdinger (Last changed V26.11), 이전 계산기 HeimerCalcQt2 폴백 수치와 일치",
+
+    "turret": {
+        "maxTurrets": 3,
+        "maxKits": 3,
+        "kitRechargeSeconds": 20,
+        "castTimeSeconds": 0.25,
+
+        "shotDamage": [7, 11, 15, 19, 23],
+        "shotApRatio": 0.35,
+        "attackSpeed": 1.75,
+        "attackRange": 550,
+
+        "beamDamage": [40, 60, 80, 100, 120],
+        "beamApRatio": 0.55,
+        "beamChargePerSecond": 0.011,
+
+        "_healthNote": "체력·방어력·마법 저항력은 위키에 레벨별 범위만 있음. 레벨 사이 공식은 확인 필요",
+        "health": { "min": 130, "max": 700 },
+        "healthApRatio": { "min": 0.05, "max": 0.53 },
+        "armor": { "min": 10, "max": 110 },
+        "magicResist": { "min": 25, "max": 86 }
+    },
+
+    "apexTurret": {
+        "durationSeconds": 8,
+        "shotDamage": [80, 100, 120],
+        "shotApRatio": 0.35,
+        "attackSpeed": 1.05,
+        "beamDamage": [100, 140, 180],
+        "beamApRatio": 0.70,
+        "beamChargePerSecond": 0.125,
+        "beamChargePerShot": 0.20,
+        "health": { "min": 725, "max": 1825 },
+        "healthApRatio": 0.50
+    }
+}

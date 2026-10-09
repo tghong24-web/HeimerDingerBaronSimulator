@@ -167,7 +167,7 @@ ui/          JavaFX 화면 (입력 패널, 체력 그래프, 결과 요약)
 ## 7. 구현 순서
 
 1. [x] `StatGrowth`와 `BaronScaler`: 레벨 → 바론 스탯, `baron.json` 로딩
-2. [x] `DamageCalculator`: 마법 저항력과 관통 공식
+2. [ ] `DamageCalculator`: 마법 저항력과 관통 공식
 3. [ ] 포탑 평타만 도는 최소 시뮬레이터 (콘솔 출력, 모드 3 가정)
 4. [ ] 포탑 광선, 하이머 스킬
 5. [ ] 바론 반격과 `TankingStrategy`: 모드 3 → 모드 2 → 모드 1 순
@@ -194,3 +194,4 @@ ui/          JavaFX 화면 (입력 패널, 체력 그래프, 결과 요약)
 ## 10. 변경 이력
 
 - 2026-10-08: 바론 스탯을 시간 기준에서 레벨 기준으로 변경 (V26.01 패치 반영). 입력을 게임 시간에서 바론 레벨로 바꾸고, 공용 `StatGrowth` 추가, 바론 체력 재생 이벤트 제거
+- 2026-10-10: 구현 1단계 완료 (`StatGrowth`, `BaronStats`, `BaronScaler`, `BaronData`/`DataLoader`, 테스트 6개)
