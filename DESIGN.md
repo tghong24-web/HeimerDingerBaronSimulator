@@ -166,8 +166,8 @@ ui/          JavaFX 화면 (입력 패널, 체력 그래프, 결과 요약)
 
 ## 7. 구현 순서
 
-1. [ ] `StatGrowth`와 `BaronScaler`: 레벨 → 바론 스탯, `baron.json` 로딩
-2. [ ] `DamageCalculator`: 마법 저항력과 관통 공식
+1. [x] `StatGrowth`와 `BaronScaler`: 레벨 → 바론 스탯, `baron.json` 로딩
+2. [x] `DamageCalculator`: 마법 저항력과 관통 공식
 3. [ ] 포탑 평타만 도는 최소 시뮬레이터 (콘솔 출력, 모드 3 가정)
 4. [ ] 포탑 광선, 하이머 스킬
 5. [ ] 바론 반격과 `TankingStrategy`: 모드 3 → 모드 2 → 모드 1 순
