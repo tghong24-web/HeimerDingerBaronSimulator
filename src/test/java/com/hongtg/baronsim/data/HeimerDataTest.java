@@ -22,16 +22,16 @@ class HeimerDataTest {
     }
 
     @Test
-    void apexTurretByRank() {
-        assertEquals(120, heimer.apexTurret().shotDamageAtRank(3), 0.0001);
-        assertEquals(180, heimer.apexTurret().beamDamageAtRank(3), 0.0001);
+    void rqTurretByRank() {
+        assertEquals(120, heimer.rqTurret().shotDamageAtRank(3), 0.0001);
+        assertEquals(180, heimer.rqTurret().beamDamageAtRank(3), 0.0001);
     }
 
     @Test
     void rejectsInvalidRank() {
         assertThrows(IllegalArgumentException.class, () -> heimer.turret().shotDamageAtRank(0));
         assertThrows(IllegalArgumentException.class, () -> heimer.turret().shotDamageAtRank(6));
-        assertThrows(IllegalArgumentException.class, () -> heimer.rocketSwarm().firstRocketDamageAtRank(4));
+        assertThrows(IllegalArgumentException.class, () -> heimer.rwRockets().firstRocketDamageAtRank(4));
     }
 
     /** 위키의 W 단일 대상 최대 피해: 90/135/180/225/270 (+103% AP) */
@@ -47,8 +47,8 @@ class HeimerDataTest {
 
     /** 위키의 R+W 단일 대상 최대 피해: 503/697.5/892 (+183% AP) */
     @Test
-    void rocketSwarmAddsUpToWikiMaximum() {
-        HeimerData.RocketSwarmData rw = heimer.rocketSwarm();
+    void rwRocketsAddsUpToWikiMaximum() {
+        HeimerData.RwRocketsData rw = heimer.rwRockets();
         int later = rw.rocketCount() - 5;
 
         assertEquals(503, rw.firstRocketDamageAtRank(1) + 4 * rw.rockets2to5DamageAtRank(1)
@@ -69,10 +69,25 @@ class HeimerDataTest {
         assertEquals(70, heimer.upgrade().cooldownAtRank(3), 0.0001);
     }
 
+    /** 실측: 평타 5 → 광선 1 → 평타 2 */
     @Test
-    void lightningGrenadeHitsSingleMonsterTwice() {
-        assertEquals(300, heimer.lightningGrenade().damageAtRank(3), 0.0001);
-        assertEquals(2, heimer.lightningGrenade().maxHitsOnSingleMonster());
+    void rqTurretAttackPatternMatchesMeasurement() {
+        HeimerData.RqTurretData rq = heimer.rqTurret();
+
+        assertEquals(8, rq.attackCount());
+        for (int i = 0; i < 5; i++) {
+            assertEquals(HeimerData.RqTurretAttack.SHOT, rq.attackAt(i));
+        }
+        assertEquals(HeimerData.RqTurretAttack.BEAM, rq.attackAt(5));
+        assertEquals(HeimerData.RqTurretAttack.SHOT, rq.attackAt(6));
+        assertEquals(HeimerData.RqTurretAttack.SHOT, rq.attackAt(7));
+        assertThrows(IllegalArgumentException.class, () -> rq.attackAt(8));
+    }
+
+    @Test
+    void reGrenadeHitsSingleMonsterTwice() {
+        assertEquals(300, heimer.reGrenade().damageAtRank(3), 0.0001);
+        assertEquals(2, heimer.reGrenade().maxHitsOnSingleMonster());
     }
 
     /** 하이머 기본 스탯도 바론과 같은 StatGrowth 공식을 쓴다. 18레벨은 기본값 + 성장값 × 17. */

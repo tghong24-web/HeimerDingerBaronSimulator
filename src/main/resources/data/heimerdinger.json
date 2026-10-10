@@ -36,7 +36,7 @@
         "magicResist": { "min": 25, "max": 86 }
     },
 
-    "apexTurret": {
+    "rqTurret": {
         "_attackPatternNote": "바론 상대 실측(2026-10-10): 공격 칸마다 이 순서로 공격. 9번째 공격은 포탑이 사라져 피해 없음. 아래 beamCharge 수치는 실측과 맞지 않아 쓰지 않음",
         "attackPattern": ["shot", "shot", "shot", "shot", "shot", "beam", "shot", "shot"],
         "durationSeconds": 8,
@@ -63,8 +63,8 @@
         "extraRocketApRatio": 0.12
     },
 
-    "rocketSwarm": {
-        "_note": "R+W. 단일 대상 최대 피해 = 1발 + 2~5발 4개 + 6~20발 15개. 전부 맞는지는 확인 필요",
+    "rwRockets": {
+        "_note": "RW(R+W). 단일 대상 최대 피해 = 1발 + 2~5발 4개 + 6~20발 15개. 전부 맞는지는 확인 필요",
         "rocketCount": 20,
         "firstRocketDamage": [135, 180, 225],
         "firstRocketApRatio": 0.45,
@@ -83,8 +83,8 @@
         "apRatio": 0.60
     },
 
-    "lightningGrenade": {
-        "_note": "R+E. 몬스터·미니언에는 튕길 때마다 피해가 들어간다. 단일 대상에는 최대 2번 적중",
+    "reGrenade": {
+        "_note": "RE(R+E). 몬스터·미니언에는 튕길 때마다 피해가 들어간다. 단일 대상에는 최대 2번 적중",
         "bounces": 3,
         "maxHitsOnSingleMonster": 2,
         "damage": [100, 200, 300],
