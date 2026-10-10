@@ -28,9 +28,24 @@ public class Simulator {
         double finalQDamage = DamageCalculator.magicDamage(baseQDamage, baron.magicResist(), input.percentPen(),
                 input.flatPen());
 
-        // turret 개수만큼 첫번째 사격 등록
+        // Q: turret 개수만큼 첫번째 사격 등록
         for (int i = 0; i < input.turretCount(); i++) {
             state.schedule(new TurretAttackEvent(0, i, finalQDamage, shotInterval));
+        }
+
+        // W 배웠으면 첫번째 로켓과 나머지 4개의 로켓 데미지를 계산 후 0초에 첫 사용 예약
+        if (input.wLevel() > 0) {
+            HeimerData.RocketsData rocket = heimerData.rockets();
+            
+            int extraRockets = rocket.rocketCount() - 1;
+            double rocketDamage = rocket.firstRocketDamageAtRank(input.wLevel()) + extraRockets * rocket.extraRocketDamageAtRank(input.wLevel());
+            double rocketAP = rocket.firstRocketApRatio() + extraRockets * rocket.extraRocketApRatio();
+            double rocketCool = rocket.cooldownAtRank(input.wLevel());
+
+            double baseWDamage = rocketDamage + rocketAP * input.ap();
+            double finalWDamage = DamageCalculator.magicDamage(baseWDamage, baron.magicResist(), input.percentPen(), input.flatPen());
+
+            state.schedule(new RocketsEvent(0, finalWDamage, rocketCool));
         }
 
         // E 배웠으면 최종 피해 계산 후 0초에 첫 사용 예약
