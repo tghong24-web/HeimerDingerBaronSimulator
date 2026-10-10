@@ -62,6 +62,23 @@ public class Simulator {
 
             state.schedule(new GrenadeEvent(0, finalEDamage, grenadeCool));
         }
+        if (input.rLevel() > 0) {
+            if (input.ultimate() == UltimateChoice.RQ) {
+                HeimerData.RqTurretData rturret = heimerData.rqTurret();
+
+                double rturretShotDamage = rturret.shotDamageAtRank(input.rLevel());
+                double rturretBeamDamage = rturret.beamDamageAtRank(input.rLevel());
+                double rturretShotAp = rturret.shotApRatio();
+                double rturretBeamAp = rturret.beamApRatio();
+
+                double baseRqShotDamage = rturretShotDamage + rturretShotAp * input.ap();
+                double baseRqBeamDamage = rturretBeamDamage + rturretBeamAp * input.ap();
+                double finalRqShotDamage = DamageCalculator.magicDamage(baseRqShotDamage, baron.magicResist(), input.percentPen(), input.flatPen());
+                double finalRqBeamDamage = DamageCalculator.magicDamage(baseRqBeamDamage, baron.magicResist(), input.percentPen(), input.flatPen());
+
+                state.schedule(new RQTurretEvent(0, 0, finalRqShotDamage, finalRqBeamDamage, rturret));
+            }
+        }
 
         // 3.마지막 처리 시각을 담을 변수
         double killSecond = 0;

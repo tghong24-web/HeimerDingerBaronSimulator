@@ -1,12 +1,13 @@
 package com.hongtg.baronsim.sim;
 
-
 // Simulation을 돌릴 때, 입력하기 편하게 정보들 record 형태로 만들어놓기
 public record SimulationInput(
     int baronLevel, 
     int qLevel,
     int wLevel,
     int eLevel,
+    int rLevel,
+    UltimateChoice ultimate,
     double ap,
     double percentPen,
     double flatPen,
@@ -31,6 +32,13 @@ public record SimulationInput(
         }
         if (wLevel < 0 || wLevel > 5) {
             throw new IllegalArgumentException("W레벨은 0이상 5이하 이어야 합니다: " + wLevel);
+        }
+        if (rLevel < 0 || rLevel > 3) {
+            throw new IllegalArgumentException("R레벨은 0이상 3이하 이어야 합니다: " + rLevel);
+        }
+
+        if (ultimate != UltimateChoice.NONE && rLevel == 0) {
+            throw new IllegalArgumentException("R을 사용하려면 R레벨이 1 이상이어야 합니다: " + ultimate);
         }
     }
 }
