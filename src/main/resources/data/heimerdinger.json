@@ -37,6 +37,8 @@
     },
 
     "apexTurret": {
+        "_attackPatternNote": "바론 상대 실측(2026-10-10): 공격 칸마다 이 순서로 공격. 9번째 공격은 포탑이 사라져 피해 없음. 아래 beamCharge 수치는 실측과 맞지 않아 쓰지 않음",
+        "attackPattern": ["shot", "shot", "shot", "shot", "shot", "beam", "shot", "shot"],
         "durationSeconds": 8,
         "shotDamage": [80, 100, 120],
         "shotApRatio": 0.35,
