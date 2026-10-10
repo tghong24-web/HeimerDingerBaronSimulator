@@ -36,9 +36,11 @@ public record SimulationInput(
         if (rLevel < 0 || rLevel > 3) {
             throw new IllegalArgumentException("R레벨은 0이상 3이하 이어야 합니다: " + rLevel);
         }
-
         if (ultimate != UltimateChoice.NONE && rLevel == 0) {
             throw new IllegalArgumentException("R을 사용하려면 R레벨이 1 이상이어야 합니다: " + ultimate);
+        }
+        if (ultimate == UltimateChoice.RW && wLevel == 0) {
+            throw new IllegalArgumentException("RW를 사용하려면 W레벨이 1 이상이어야 합니다: " + ultimate);
         }
     }
 }

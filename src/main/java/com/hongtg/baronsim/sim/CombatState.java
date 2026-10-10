@@ -9,6 +9,7 @@ public class CombatState {
     private double baronHealth;
     private final PriorityQueue<Event> queue;
     private final Map<DamageSource, Double> damageBySource = new EnumMap<>(DamageSource.class);
+    private double rReadyTime = 0;
 
     public CombatState(double baronStartHealth){
         this.baronHealth = baronStartHealth;
@@ -45,4 +46,13 @@ public class CombatState {
     public boolean isBaronDead() {
         return baronHealth <= 0;
     }
+
+    public boolean isRReady(double time) {
+        return time >= rReadyTime;
+    }
+
+    public void useR(double time, double cooldown) {
+        rReadyTime = time + cooldown;
+    }
+
 }

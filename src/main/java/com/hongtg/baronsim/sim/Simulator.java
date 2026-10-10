@@ -44,8 +44,30 @@ public class Simulator {
 
             double baseWDamage = rocketDamage + rocketAP * input.ap();
             double finalWDamage = DamageCalculator.magicDamage(baseWDamage, baron.magicResist(), input.percentPen(), input.flatPen());
+            
+            UltimateSpec rw = null;
+            if (input.ultimate() == UltimateChoice.RW) {
+                HeimerData.RwRocketsData rRocket = heimerData.rwRockets();
 
-            state.schedule(new RocketsEvent(0, finalWDamage, rocketCool));
+                int rRocket2to5Count = 4;
+                // 첫발 (1개) + 2~5번째 (4개) 를 뺀 나머지 로켓 수
+                int rRocketExtraCount = rRocket.rocketCount() - 5;
+                
+                double rFirstRocketDamage = rRocket.firstRocketDamageAtRank(input.rLevel());
+                double rFirstRocketAP = rRocket.firstRocketApRatio();
+                double r2to5RocketDamage = rRocket.rockets2to5DamageAtRank(input.rLevel());
+                double r2to5RocketAP = rRocket.rockets2to5ApRatio();
+                double rExtraRocketDamage = rRocket.laterRocketDamageAtRank(input.rLevel());
+                double rExtraRocketAP = rRocket.laterRocketApRatio();
+
+                double baseRWDamage = rFirstRocketDamage + rFirstRocketAP * input.ap()
+                                    + (r2to5RocketDamage + r2to5RocketAP * input.ap()) * rRocket2to5Count
+                                    + (rExtraRocketDamage + rExtraRocketAP * input.ap()) * rRocketExtraCount;
+                double finalRWDamage = DamageCalculator.magicDamage(baseRWDamage, baron.magicResist(), input.percentPen(), input.flatPen());
+
+                rw = new UltimateSpec(finalRWDamage, heimerData.upgrade().cooldownAtRank(input.rLevel()));
+            }
+            state.schedule(new RocketsEvent(0, finalWDamage, rocketCool, rw));
         }
 
         // E 배웠으면 최종 피해 계산 후 0초에 첫 사용 예약
@@ -60,8 +82,24 @@ public class Simulator {
             double finalEDamage = DamageCalculator.magicDamage(baseEDamage, baron.magicResist(), input.percentPen(),
                     input.flatPen());
 
-            state.schedule(new GrenadeEvent(0, finalEDamage, grenadeCool));
+            UltimateSpec re = null;
+            if (input.ultimate() == UltimateChoice.RE) {
+                HeimerData.ReGrenadeData rGrenade = heimerData.reGrenade();
+
+                int rGrenadeHits = rGrenade.maxHitsOnSingleMonster();
+                double rGrenadeDamage = rGrenade.damageAtRank(input.rLevel());
+                double rGrenadeAP = rGrenade.apRatio();
+
+                double baseREDamage = (rGrenadeDamage + rGrenadeAP * input.ap()) * rGrenadeHits;
+                double finalREDamage = DamageCalculator.magicDamage(baseREDamage, baron.magicResist(), input.percentPen(), input.flatPen());
+                
+                re = new UltimateSpec(finalREDamage, heimerData.upgrade().cooldownAtRank(input.rLevel()));
+            }
+
+            state.schedule(new GrenadeEvent(0, finalEDamage, grenadeCool, re));
         }
+
+        // RQ 선택했으면 포탑하나 깔기
         if (input.rLevel() > 0) {
             if (input.ultimate() == UltimateChoice.RQ) {
                 HeimerData.RqTurretData rturret = heimerData.rqTurret();
@@ -79,6 +117,7 @@ public class Simulator {
                 state.schedule(new RQTurretEvent(0, 0, finalRqShotDamage, finalRqBeamDamage, rturret));
             }
         }
+    
 
         // 3.마지막 처리 시각을 담을 변수
         double killSecond = 0;
