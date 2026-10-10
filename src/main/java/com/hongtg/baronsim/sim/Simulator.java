@@ -7,29 +7,45 @@ import com.hongtg.baronsim.model.BaronStats;
 import com.hongtg.baronsim.calc.DamageCalculator;
 
 public class Simulator {
-    public SimulatorResult run(int baronLevel, int qRank, double ap,
-            double percentPen, double flatPen,
-            int turretCount, double timeLimit) {
+    public SimulatorResult run(SimulationInput input) {
+
         BaronData baronData = DataLoader.loadBaron();
         HeimerData heimerData = DataLoader.loadHeimer();
 
-        BaronStats baron = baronData.toScaler().statsAt(baronLevel);
+        BaronStats baron = baronData.toScaler().statsAt(input.baronLevel());
 
+        // 1.CombatState에 바론 체력 받기
+        CombatState state = new CombatState(baron.health());
+
+        // Q 데이터 읽어오기
         HeimerData.TurretData turret = heimerData.turret();
 
-        double shotDamage = turret.shotDamageAtRank(qRank);
+        double shotDamage = turret.shotDamageAtRank(input.qLevel());
         double shotAP = turret.shotApRatio();
         double shotInterval = turret.attackIntervalSeconds();
 
-        double baseDamage = shotDamage + shotAP * ap;
-        double finalDamage = DamageCalculator.magicDamage(baseDamage, baron.magicResist(), percentPen, flatPen);
-        
-        // 1.CombatState에 바론 체력 받기
-        CombatState state = new CombatState(baron.health());
-        
-        // 2.turret 개수만큼 첫번째 사격 등록
-        for (int i = 0; i < turretCount; i++) {
-            state.schedule(new TurretAttackEvent(0, i, finalDamage, shotInterval));
+        double baseQDamage = shotDamage + shotAP * input.ap();
+        double finalQDamage = DamageCalculator.magicDamage(baseQDamage, baron.magicResist(), input.percentPen(),
+                input.flatPen());
+
+        // turret 개수만큼 첫번째 사격 등록
+        for (int i = 0; i < input.turretCount(); i++) {
+            state.schedule(new TurretAttackEvent(0, i, finalQDamage, shotInterval));
+        }
+
+        // E 배웠으면 최종 피해 계산 후 0초에 첫 사용 예약
+        if (input.eLevel() > 0) {
+            HeimerData.GrenadeData grenade = heimerData.grenade();
+
+            double grenadeDamage = grenade.damageAtRank(input.eLevel());
+            double grenadeAP = grenade.apRatio();
+            double grenadeCool = grenade.cooldownSeconds();
+
+            double baseEDamage = grenadeDamage + grenadeAP * input.ap();
+            double finalEDamage = DamageCalculator.magicDamage(baseEDamage, baron.magicResist(), input.percentPen(),
+                    input.flatPen());
+
+            state.schedule(new GrenadeEvent(0, finalEDamage, grenadeCool));
         }
 
         // 3.마지막 처리 시각을 담을 변수
@@ -38,12 +54,13 @@ public class Simulator {
         // 4.바론이 죽을 때까지 이벤트 하나씩 꺼내기
         while (state.hasEvents() && !state.isBaronDead()) {
             Event e = state.nextEvent();
-            if (e.time() > timeLimit) break;
+            if (e.time() > input.timeLimit())
+                break;
             killSecond = e.time();
 
             e.apply(state);
         }
 
-       return new SimulatorResult(state.isBaronDead(), killSecond);
+        return new SimulatorResult(state.isBaronDead(), killSecond);
     }
 }
