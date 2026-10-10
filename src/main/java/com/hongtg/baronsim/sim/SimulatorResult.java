@@ -1,3 +1,5 @@
 package com.hongtg.baronsim.sim;
 
-public record SimulatorResult (boolean killed, double killTime) {}
+import java.util.Map;
+
+public record SimulatorResult (boolean killed, double killTime, Map<DamageSource, Double> damageBySource) {}

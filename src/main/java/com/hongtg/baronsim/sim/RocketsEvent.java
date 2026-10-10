@@ -7,7 +7,7 @@ public record RocketsEvent(double time, double damage, double coolDown)
     @Override
     public void apply(CombatState state) {
         // 1. 바론 체력 깎기
-        state.damageBaron(damage);
+        state.damageBaron(DamageSource.ROCKETS, damage);
         
         // 2. 다음 공격 예약: 새 RocketsEvent를 만들어 state.schedule(...)
         RocketsEvent nextAttack = new RocketsEvent(time + coolDown, damage, coolDown);

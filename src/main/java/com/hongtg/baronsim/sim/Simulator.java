@@ -76,6 +76,6 @@ public class Simulator {
             e.apply(state);
         }
 
-        return new SimulatorResult(state.isBaronDead(), killSecond);
+        return new SimulatorResult(state.isBaronDead(), killSecond, state.damageBySource());
     }
 }
