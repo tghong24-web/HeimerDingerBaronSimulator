@@ -87,3 +87,4 @@ class ReGrenadeTest {
         assertEquals(302.605, total(result, DamageSource.RE_GRENADE), 0.01);
     }
 }
+

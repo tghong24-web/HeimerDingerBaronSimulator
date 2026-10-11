@@ -114,7 +114,9 @@ public class Simulator {
                 double finalRqShotDamage = DamageCalculator.magicDamage(baseRqShotDamage, baron.magicResist(), input.percentPen(), input.flatPen());
                 double finalRqBeamDamage = DamageCalculator.magicDamage(baseRqBeamDamage, baron.magicResist(), input.percentPen(), input.flatPen());
 
-                state.schedule(new RQTurretEvent(0, 0, finalRqShotDamage, finalRqBeamDamage, rturret));
+
+                // 쿨이 돌 때마다 RQ 설치예약
+                state.schedule(new RQPlaceEvent(0, finalRqShotDamage, finalRqBeamDamage, rturret, heimerData.upgrade().cooldownAtRank(input.rLevel())));
             }
         }
     

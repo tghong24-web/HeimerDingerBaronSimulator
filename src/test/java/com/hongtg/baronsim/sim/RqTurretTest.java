@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
  *   RQ 평타 1발 = (120 + 0.35*300) * 100/185.06 ≈ 121.58
  *   RQ 광선 1방 = (180 + 0.70*300) * 100/185.06 ≈ 210.74
  *   공격 간격 1/1.05초, 패턴: 평타 5 → 광선 1 → 평타 2 (총 8회)
+ *   R 쿨(R3 70초)마다 다시 설치한다: 0, 70, 140, 210, 280초 ...
  */
 class RqTurretTest {
 
@@ -23,9 +24,17 @@ class RqTurretTest {
     private final Simulator simulator = new Simulator();
 
     private SimulatorResult run(int wLevel, int eLevel, UltimateChoice ultimate, int turretCount) {
+        return run(wLevel, eLevel, ultimate, turretCount, 300);
+    }
+
+    private SimulatorResult run(int wLevel, int eLevel, UltimateChoice ultimate, int turretCount, double timeLimit) {
         int rLevel = (ultimate == UltimateChoice.NONE) ? 0 : 3;
         return simulator.run(new SimulationInput(
-                15, 5, wLevel, eLevel, rLevel, ultimate, 300, 0, 0, turretCount, 300));
+                15, 5, wLevel, eLevel, rLevel, ultimate, 300, 0, 0, turretCount, timeLimit));
+    }
+
+    private double total(SimulatorResult result, DamageSource source) {
+        return result.damageBySource().getOrDefault(source, 0.0);
     }
 
     @Test
@@ -37,14 +46,20 @@ class RqTurretTest {
 
     @Test
     void rqTurretFiresSevenShotsAndOneBeam() {
-        // 포탑 0개라 바론이 안 죽으므로 8번 공격이 전부 들어간다
-        SimulatorResult result = run(0, 0, UltimateChoice.RQ, 0);
+        // 포탑 0개, 60초 제한: 재설치(70초) 전이라 터렛 1개의 8번 공격만 들어간다
+        SimulatorResult result = run(0, 0, UltimateChoice.RQ, 0, 60);
 
-        double shotTotal = result.damageBySource().getOrDefault(DamageSource.RQ_TURRET_SHOT, 0.0);
-        double beamTotal = result.damageBySource().getOrDefault(DamageSource.RQ_TURRET_BEAM, 0.0);
+        assertEquals(7 * RQ_SHOT, total(result, DamageSource.RQ_TURRET_SHOT), 0.01, "RQ 평타 합계 (7발)");
+        assertEquals(1 * RQ_BEAM, total(result, DamageSource.RQ_TURRET_BEAM), 0.01, "RQ 광선 합계 (1방)");
+    }
 
-        assertEquals(7 * RQ_SHOT, shotTotal, 0.01, "RQ 평타 합계 (7발)");
-        assertEquals(1 * RQ_BEAM, beamTotal, 0.01, "RQ 광선 합계 (1방)");
+    @Test
+    void rqTurretIsPlacedAgainEveryUltimateCooldown() {
+        // 포탑 0개, 300초 제한: 0, 70, 140, 210, 280초에 5번 설치
+        SimulatorResult result = run(0, 0, UltimateChoice.RQ, 0, 300);
+
+        assertEquals(5 * 7 * RQ_SHOT, total(result, DamageSource.RQ_TURRET_SHOT), 0.05);
+        assertEquals(5 * RQ_BEAM, total(result, DamageSource.RQ_TURRET_BEAM), 0.01);
     }
 
     @Test
@@ -57,10 +72,11 @@ class RqTurretTest {
 
     @Test
     void rqTurretWithOneTurret() {
+        // 70초, 140초에 재설치 (재설치가 없으면 144.00초)
         SimulatorResult result = run(0, 0, UltimateChoice.RQ, 1);
 
         assertTrue(result.killed());
-        assertEquals(144.00, result.killTime(), 0.01);
+        assertEquals(135.43, result.killTime(), 0.01);
     }
 
     @Test
