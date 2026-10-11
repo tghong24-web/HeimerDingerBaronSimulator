@@ -74,6 +74,11 @@ n = 바론 레벨 − 1
 - 강화 포탑(R+Q)은 바론 상대로 공격 칸마다(약 0.95초 간격) 평타 5 → 광선 1 → 평타 2 순서로 공격한다. 9번째 공격은 포탑이 8초에 사라져 피해가 들어가지 않는다 (2026-10-10 연습 모드 실측, `heimerdinger.json`의 `rqTurret.attackPattern`)
 - W(마이크로 로켓): 5발 모두 같은 대상(바론)에 맞는다
 - R+E(번개 수류탄): 몬스터에는 튕길 때마다 피해가 들어가며, 단일 대상(바론)에는 최대 2번 적중한다
+- R 강화 스킬과 쿨타임 (2026-10-11 확인)
+  - RW는 W와, RE는 E와 쿨타임을 공유한다. RW를 쓰면 W 쿨타임이 돌고, W가 쿨타임이면 RW도 못 쓴다. RQ는 Q와 공유하지 않는다
+  - R 쿨타임(`upgrade.cooldown`, R1~3 기준 100/85/70초)은 강화 스킬을 쓴 직후부터 돈다
+  - 사용 시점: RQ는 0초, RW와 RE는 첫 W/E 차례(0초)에 쓴다. 바론 막타 타이밍에 맞춰 쓰는 옵션은 두지 않는다. 사용자가 체력 그래프의 RW/RE 기준선(6장)을 보고 판단한다
+  - 재사용: R 쿨타임이 돌면 다시 쓴다. RW/RE는 R 쿨타임이 끝난 뒤 다음 W/E 차례에 일반 W/E 대신 나간다. 실전에서는 드물지만 "스킬은 쿨타임이 돌면 바로 쓴다"는 가정과 맞춘다
 
 ### 연습 모드에서 확인할 것
 - [x] 강화 포탑(R+Q)이 바론 상대로 광선을 몇 번 쏘는가: 8초 동안 1번 (평타 5 → 광선 → 평타 2)
@@ -105,7 +110,10 @@ while (바론 체력 > 0 && 시간 < 제한 && 딜 수단 남음):
 - `TurretAttackEvent`: 포탑 평타 (구현)
 - `RocketsEvent`: W, 5발 합산 피해를 쿨타임마다 (구현)
 - `GrenadeEvent`: E, 쿨타임마다 (구현)
-- 강화 스킬 이벤트: R+Q 강화 포탑(공격 순서 패턴), R+W, R+E (예정)
+- `RQPlaceEvent`: R 쿨타임마다 RQ 터렛 설치. 첫 공격을 예약하고 자기 자신을 다시 예약 (구현)
+- `RQTurretEvent`: RQ 터렛, 공격 순서 패턴대로 8회 (구현)
+- RW, RE: `RocketsEvent`, `GrenadeEvent`가 차례마다 R 쿨타임을 보고 일반 스킬과 강화 스킬 중 하나를 쓴다. 강화 스킬 정보는 `UltimateSpec`(피해, 쿨타임)으로 전달하고, RW/RE를 고르지 않았으면 null (구현)
+- R 쿨타임은 `CombatState`의 `rReadyTime`(R이 다시 준비되는 시각) 하나로 관리한다 (`isRReady`, `useR`)
 - `HeimerAttackEvent`: 하이머 평타
 - `TurretPlaceEvent`: 포탑 (재)설치
 - `BaronAttackEvent`: 현재 어그로 대상에게 피해, 다음 공격 예약
@@ -154,7 +162,7 @@ enum TankMode { HEIMER, TURRET, DUMMY }
 model/       Champion, Turret, Baron, Dummy, Item, Rune, Stats, Target
 data/        JSON 로더 (패치별 수치)
 calc/        StatGrowth (성장 공식, 바론과 챔피언 공용), BaronScaler (레벨 → 바론 스탯), DamageCalculator (방어력·관통 공식)
-sim/         Simulator, SimulationInput(입력 묶음), SimulatorResult, CombatState, DamageSource(피해 출처 enum), Event와 구현체, TankingStrategy와 구현체
+sim/         Simulator, SimulationInput(입력 묶음), SimulatorResult, CombatState, DamageSource(피해 출처 enum), UltimateChoice, UltimateSpec, Event와 구현체, TankingStrategy와 구현체
 ui/          JavaFX 화면 (입력 패널, 체력 그래프, 결과 요약)
 ```
 
@@ -179,6 +187,7 @@ ui/          JavaFX 화면 (입력 패널, 체력 그래프, 결과 요약)
   - 모드 1: 흡혈률, 방어 스탯
   - 모드 3: 더미 스탯
 - 결과: 체력 그래프, 처치 시간, 딜 비중
+- 체력 그래프에 RW/RE 한 방 피해 높이의 가로 기준선을 그린다. 체력 곡선이 이 선 아래로 내려오는 시점이 막타 타이밍이다
 - 추후: 세 모드를 한 그래프에 겹쳐 그리는 비교 기능
 
 ## 7. 구현 순서
@@ -186,7 +195,7 @@ ui/          JavaFX 화면 (입력 패널, 체력 그래프, 결과 요약)
 1. [x] `StatGrowth`와 `BaronScaler`: 레벨 → 바론 스탯, `baron.json` 로딩
 2. [x] `DamageCalculator`: 마법 저항력과 관통 공식
 3. [x] 포탑 평타만 도는 최소 시뮬레이터 (콘솔 출력, 모드 3 가정)
-4. [ ] 하이머 스킬과 피해 출처별 합계 (`SimulationInput`, W, E, `DamageSource` 완료 / R 강화 스킬 남음)
+4. [x] 하이머 스킬과 피해 출처별 합계 (`SimulationInput`, W, E, RQ/RW/RE와 R 재사용, `DamageSource`)
 5. [ ] 바론 반격과 `TankingStrategy`: 모드 3 → 모드 2 → 모드 1 순
 6. [ ] 포탑 사망과 재설치
 7. [ ] 아이템과 룬
@@ -216,3 +225,5 @@ ui/          JavaFX 화면 (입력 패널, 체력 그래프, 결과 요약)
 - 2026-10-10: 구현 3단계 완료 (Event, CombatState, TurretAttackEvent, Simulator). W, E, R 수치와 기본 스탯 추가. W 전탄 적중, R+E 단일 대상 2회 적중 가정 확정
 - 2026-10-10: 4단계 진행. 입력을 `SimulationInput`으로 묶음, W·E 이벤트와 피해 출처별 합계 추가. 일반 포탑 광선 제외, 강화 포탑 공격 순서 실측 반영
 - 2026-10-10: R 강화 스킬 이름을 apex/swarm/lightning에서 RQ/RW/RE로 통일. RQ 터렛 공격 순서를 `RqTurretAttack` enum으로 읽도록 추가
+- 2026-10-11: RQ 터렛 구현과 테스트 완료. R 강화 스킬의 쿨타임 공유(RW-W, RE-E), R 쿨타임 시작 시점, 사용 시점(첫 차례)과 재사용 규칙 확정. 막타 옵션 대신 UI 기준선으로 결정
+- 2026-10-11: 구현 4단계 완료. RW·RE(W/E와 쿨타임 공유), R 쿨타임마다 재사용, `RQPlaceEvent`로 RQ 재설치. 시뮬레이터 테스트 37개
