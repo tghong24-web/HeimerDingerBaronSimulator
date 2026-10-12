@@ -29,11 +29,11 @@
         "beamApRatio": 0.55,
         "beamChargePerSecond": 0.011,
 
-        "_healthNote": "체력·방어력·마법 저항력은 위키에 레벨별 범위만 있음. 레벨 사이 공식은 확인 필요",
-        "health": { "min": 130, "max": 700 },
-        "healthApRatio": { "min": 0.05, "max": 0.53 },
-        "armor": { "min": 10, "max": 110 },
-        "magicResist": { "min": 25, "max": 86 }
+        "_statNote": "하이머 레벨별 값(2026-10-12 툴팁·실측). 1~18레벨은 같은 폭으로 증가, 19레벨은 18과 20의 중간, 19~20은 탑 퀘스트",
+        "health": { "level1": 130, "level18": 640, "level20": 700 },
+        "healthApRatio": { "level1": 0.05, "level18": 0.45, "level20": 0.53 },
+        "armor": { "level1": 10, "level18": 80, "level20": 110 },
+        "magicResist": { "level1": 25, "level18": 65, "level20": 86 }
     },
 
     "rqTurret": {
@@ -47,8 +47,10 @@
         "beamApRatio": 0.70,
         "beamChargePerSecond": 0.125,
         "beamChargePerShot": 0.20,
-        "health": { "min": 725, "max": 1825 },
-        "healthApRatio": 0.50
+        "health": { "level1": 725, "level18": 1525, "level20": 1825 },
+        "healthApRatio": 0.50,
+        "armor": { "level1": 30, "level18": 90, "level20": 100 },
+        "magicResist": { "level1": 30, "level18": 90, "level20": 100 }
     },
 
     "rockets": {

@@ -22,8 +22,29 @@ public record HeimerData(
         ReGrenadeData reGrenade,
         UpgradeData upgrade) {
 
-    /** 레벨에 따라 바뀌는 값의 최소(1레벨)와 최대(18레벨). 사이 공식은 아직 미확인. */
-    public record Range(double min, double max) {}
+    /**
+     * 하이머 레벨(1~20)에 따라 바뀌는 포탑 스탯. 1·18·20레벨 값을 저장한다 (2026-10-12 실측).
+     * 1~18레벨은 레벨마다 같은 폭으로 늘고, 19레벨은 18과 20의 정확히 중간, 20레벨은 그 값 그대로다.
+     * 19~20레벨은 탑 퀘스트로만 도달한다.
+     */
+    public record LevelScaledStat(double level1, double level18, double level20) {
+        public static final int MIN_LEVEL = 1;
+        public static final int MAX_LEVEL = 20;
+
+        public double valueAt(int heimerLevel) {
+            if (heimerLevel < MIN_LEVEL || heimerLevel > MAX_LEVEL) {
+                throw new IllegalArgumentException(
+                        "하이머 레벨은 " + MIN_LEVEL + "~" + MAX_LEVEL + "이어야 합니다: " + heimerLevel);
+            }
+            if (heimerLevel <= 18) {
+                return level1 + (level18 - level1) * (heimerLevel - 1) / 17.0;
+            }
+            if (heimerLevel == 19) {
+                return (level18 + level20) / 2.0;
+            }
+            return level20;
+        }
+    }
 
     /** 하이머딩거 기본 스탯. 성장은 바론과 같은 StatGrowth 공식을 쓴다. */
     public record ChampionStats(
@@ -50,10 +71,23 @@ public record HeimerData(
             double[] beamDamage,
             double beamApRatio,
             double beamChargePerSecond,
-            Range health,
-            Range healthApRatio,
-            Range armor,
-            Range magicResist) {
+            LevelScaledStat health,
+            LevelScaledStat healthApRatio,
+            LevelScaledStat armor,
+            LevelScaledStat magicResist) {
+
+        /** 하이머 레벨과 주문력에 따른 포탑 최대 체력. */
+        public double healthAt(int heimerLevel, double ap) {
+            return health.valueAt(heimerLevel) + healthApRatio.valueAt(heimerLevel) * ap;
+        }
+
+        public double armorAt(int heimerLevel) {
+            return armor.valueAt(heimerLevel);
+        }
+
+        public double magicResistAt(int heimerLevel) {
+            return magicResist.valueAt(heimerLevel);
+        }
 
         /** Q 레벨(1~5)에 해당하는 평타 기본 피해. */
         public double shotDamageAtRank(int qRank) {
@@ -91,8 +125,23 @@ public record HeimerData(
             double beamApRatio,
             double beamChargePerSecond,
             double beamChargePerShot,
-            Range health,
-            double healthApRatio) {
+            LevelScaledStat health,
+            double healthApRatio,
+            LevelScaledStat armor,
+            LevelScaledStat magicResist) {
+
+        /** 하이머 레벨과 주문력에 따른 RQ 터렛 최대 체력. AP 계수는 레벨과 무관하다. */
+        public double healthAt(int heimerLevel, double ap) {
+            return health.valueAt(heimerLevel) + healthApRatio * ap;
+        }
+
+        public double armorAt(int heimerLevel) {
+            return armor.valueAt(heimerLevel);
+        }
+
+        public double magicResistAt(int heimerLevel) {
+            return magicResist.valueAt(heimerLevel);
+        }
 
         /** R 레벨(1~3)에 해당하는 평타 기본 피해. */
         public double shotDamageAtRank(int rRank) {
@@ -220,6 +269,13 @@ public record HeimerData(
         Objects.requireNonNull(rqTurret.shotDamage(), "heimerdinger.json에 rqTurret.shotDamage가 없습니다");
         Objects.requireNonNull(rqTurret.beamDamage(), "heimerdinger.json에 rqTurret.beamDamage가 없습니다");
         Objects.requireNonNull(rqTurret.attackPattern(), "heimerdinger.json에 rqTurret.attackPattern이 없습니다");
+        Objects.requireNonNull(turret.health(), "heimerdinger.json에 turret.health가 없습니다");
+        Objects.requireNonNull(turret.healthApRatio(), "heimerdinger.json에 turret.healthApRatio가 없습니다");
+        Objects.requireNonNull(turret.armor(), "heimerdinger.json에 turret.armor가 없습니다");
+        Objects.requireNonNull(turret.magicResist(), "heimerdinger.json에 turret.magicResist가 없습니다");
+        Objects.requireNonNull(rqTurret.health(), "heimerdinger.json에 rqTurret.health가 없습니다");
+        Objects.requireNonNull(rqTurret.armor(), "heimerdinger.json에 rqTurret.armor가 없습니다");
+        Objects.requireNonNull(rqTurret.magicResist(), "heimerdinger.json에 rqTurret.magicResist가 없습니다");
         if (rqTurret.attackPattern().length == 0) {
             throw new IllegalArgumentException("heimerdinger.json의 rqTurret.attackPattern이 비어 있습니다");
         }

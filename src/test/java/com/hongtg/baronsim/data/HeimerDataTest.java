@@ -96,4 +96,53 @@ class HeimerDataTest {
         assertEquals(558, heimer.stats().health().valueAt(1), 0.0001);
         assertEquals(558 + 105 * 17, heimer.stats().health().valueAt(18), 0.0001);
     }
+
+    /** 포탑 스탯 실측 표(2026-10-12): 1~18레벨은 같은 폭, 19는 18과 20의 중간. */
+    @Test
+    void turretStatsByHeimerLevel() {
+        HeimerData.TurretData t = heimer.turret();
+
+        assertEquals(130, t.healthAt(1, 0), 0.0001);
+        assertEquals(130 + 30 * 9, t.healthAt(10, 0), 0.0001);   // 레벨당 30
+        assertEquals(640, t.healthAt(18, 0), 0.0001);
+        assertEquals(670, t.healthAt(19, 0), 0.0001);
+        assertEquals(700, t.healthAt(20, 0), 0.0001);
+
+        assertEquals(10, t.armorAt(1), 0.0001);
+        assertEquals(80, t.armorAt(18), 0.0001);
+        assertEquals(95, t.armorAt(19), 0.0001);
+        assertEquals(110, t.armorAt(20), 0.0001);
+
+        assertEquals(65, t.magicResistAt(18), 0.0001);
+        assertEquals(75.5, t.magicResistAt(19), 0.0001);
+        assertEquals(86, t.magicResistAt(20), 0.0001);
+    }
+
+    @Test
+    void turretHealthScalesWithAp() {
+        HeimerData.TurretData t = heimer.turret();
+
+        assertEquals(130 + 0.05 * 300, t.healthAt(1, 300), 0.0001);
+        assertEquals(640 + 0.45 * 300, t.healthAt(18, 300), 0.0001);
+        assertEquals(700 + 0.53 * 300, t.healthAt(20, 300), 0.0001);
+    }
+
+    @Test
+    void rqTurretStatsByHeimerLevel() {
+        HeimerData.RqTurretData rq = heimer.rqTurret();
+
+        assertEquals(725 + 0.5 * 300, rq.healthAt(1, 300), 0.0001);
+        assertEquals(1525, rq.healthAt(18, 0), 0.0001);
+        assertEquals(1675, rq.healthAt(19, 0), 0.0001);
+        assertEquals(1825, rq.healthAt(20, 0), 0.0001);
+        assertEquals(30, rq.armorAt(1), 0.0001);
+        assertEquals(90, rq.magicResistAt(18), 0.0001);
+        assertEquals(100, rq.armorAt(20), 0.0001);
+    }
+
+    @Test
+    void rejectsInvalidHeimerLevel() {
+        assertThrows(IllegalArgumentException.class, () -> heimer.turret().healthAt(0, 0));
+        assertThrows(IllegalArgumentException.class, () -> heimer.turret().armorAt(21));
+    }
 }
