@@ -3,6 +3,7 @@ package com.hongtg.baronsim.sim;
 import com.hongtg.baronsim.data.BaronData;
 import com.hongtg.baronsim.data.DataLoader;
 import com.hongtg.baronsim.model.Dummy;
+import com.hongtg.baronsim.model.Heimer;
 import com.hongtg.baronsim.model.Turret;
 import com.hongtg.baronsim.data.HeimerData;
 import com.hongtg.baronsim.model.BaronStats;
@@ -20,9 +21,10 @@ public class Simulator {
 
         BaronStats baron = baronData.toScaler().statsAt(input.baronLevel());
 
-        // 1.CombatState에 바론 체력 받기 + Dummy 생성
-        Dummy dummy = new Dummy(0);
-        CombatState state = new CombatState(baron.health(), new DummyTankingStrategy(dummy));
+        // 1.CombatState에 바론 체력 받기 + Heimer 생성
+        double heimerHp = heimerData.stats().health().valueAt(input.heimerLevel());
+        double heimerArmor = heimerData.stats().armor().valueAt(input.heimerLevel());
+        Heimer heimer = new Heimer(heimerHp, heimerArmor);
 
         // Q 데이터 읽어오기
         HeimerData.TurretData turret = heimerData.turret();
@@ -43,8 +45,24 @@ public class Simulator {
         for (int i = 0; i < input.turretCount(); i++) {
             Turret t = new Turret(turretHp, turretArmor);
             turrets.add(t);
+        }
+
+        // Target Mode 정하기
+        TankingStrategy strategy;
+        if (input.hasDummy()) {
+            strategy = new DummyTankingStrategy(new Dummy(0));
+        }
+        else {
+            strategy = new NoDummyTankingStrategy(turrets, heimer);
+        }
+
+        // 입력한 전략에 맞는 state 생성
+        CombatState state = new CombatState(baron.health(), strategy);
+        
+        for (Turret t: turrets) {
             state.schedule(new TurretAttackEvent(0, finalQDamage, shotInterval, t));
         }
+         
         // W 배웠으면 첫번째 로켓과 나머지 4개의 로켓 데미지를 계산 후 0초에 첫 사용 예약
         if (input.wLevel() > 0) {
             HeimerData.RocketsData rocket = heimerData.rockets();
@@ -132,7 +150,6 @@ public class Simulator {
             }
         }
 
-        // 바론이 현재 Target에게 평타 넣는 이벤트 시작
         double baronDamage = baron.attackDamage();
         double baronAttackInterval = 1 / baron.attackSpeed();
     

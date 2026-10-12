@@ -70,7 +70,7 @@ class BaronAttackEventTest {
     void dummyDoesNotChangeKillTime() {
         // 모드 3에서는 바론 반격이 있어도 처치 시간이 그대로여야 한다 (포탑 3개: 50.86초)
         SimulatorResult result = new Simulator().run(new SimulationInput(
-                15, 13, 5, 0, 0, 0, UltimateChoice.NONE, 300, 0, 0, 3, 300));
+                15, 13, 5, 0, 0, 0, UltimateChoice.NONE, 300, 0, 0, 3, RqTurretPosition.FRONT, true, 300));
 
         assertEquals(50.86, result.killTime(), 0.01);
     }

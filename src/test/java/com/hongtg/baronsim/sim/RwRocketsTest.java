@@ -23,7 +23,7 @@ class RwRocketsTest {
 
     private SimulatorResult run(int eLevel, int rLevel, int turretCount, double timeLimit) {
         return simulator.run(new SimulationInput(
-                15, 13, 5, 5, eLevel, rLevel, UltimateChoice.RW, 300, 0, 0, turretCount, timeLimit));
+                15, 13, 5, 5, eLevel, rLevel, UltimateChoice.RW, 300, 0, 0, turretCount, RqTurretPosition.FRONT, true, timeLimit));
     }
 
     private double rwTotal(SimulatorResult result) {
@@ -80,6 +80,6 @@ class RwRocketsTest {
     @Test
     void rwRequiresW() {
         assertThrows(IllegalArgumentException.class, () -> new SimulationInput(
-                15, 13, 5, 0, 0, 3, UltimateChoice.RW, 300, 0, 0, 3, 300));
+                15, 13, 5, 0, 0, 3, UltimateChoice.RW, 300, 0, 0, 3, RqTurretPosition.FRONT, true, 300));
     }
 }

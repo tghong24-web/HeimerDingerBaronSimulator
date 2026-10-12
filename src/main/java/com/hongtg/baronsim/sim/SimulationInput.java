@@ -13,6 +13,8 @@ public record SimulationInput(
     double percentPen,
     double flatPen,
     int turretCount,
+    RqTurretPosition rqPosition,
+    boolean hasDummy,
     double timeLimit) {
     
     public SimulationInput {
@@ -40,11 +42,17 @@ public record SimulationInput(
         if (rLevel < 0 || rLevel > 3) {
             throw new IllegalArgumentException("R레벨은 0이상 3이하 이어야 합니다: " + rLevel);
         }
+        if (ultimate == null) {
+            throw new IllegalArgumentException("R사용 유무 선택을 해야합니다");
+        }
         if (ultimate != UltimateChoice.NONE && rLevel == 0) {
             throw new IllegalArgumentException("R을 사용하려면 R레벨이 1 이상이어야 합니다: " + ultimate);
         }
         if (ultimate == UltimateChoice.RW && wLevel == 0) {
             throw new IllegalArgumentException("RW를 사용하려면 W레벨이 1 이상이어야 합니다: " + ultimate);
+        }
+        if (rqPosition == null) {
+            throw new IllegalArgumentException("RQ 터렛 위치를 정해야 합니다");
         }
     }
 }
