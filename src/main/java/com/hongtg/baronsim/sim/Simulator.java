@@ -183,6 +183,6 @@ public class Simulator {
             outcome = Outcome.TIME_LIMIT;
         }
 
-        return new SimulatorResult(outcome, killSecond, state.damageBySource());
+        return new SimulatorResult(outcome, killSecond, state.damageBySource(), state.gazeLossBySource());
     }
 }

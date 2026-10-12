@@ -11,6 +11,7 @@ import com.hongtg.baronsim.model.Target;
 public class CombatState {
     private double baronHealth;
     private final Map<DamageSource, Double> damageBySource = new EnumMap<>(DamageSource.class);
+    private final Map<DamageSource, Double> gazeLossBySource = new EnumMap<>(DamageSource.class);
     private double rReadyTime = 0;
     private final TankingStrategy strategy;
     private final Heimer heimer;
@@ -48,15 +49,23 @@ public class CombatState {
         // 남작의 시선(Baron Gaze)이 적용 중이라면 딜감소 gazeReduction(0.5)만큼
         boolean gazed = gazeTarget != null && (gazeTarget == attacker || gazeTarget instanceof Heimer);
         double afterGazedAmount = gazed ? amount * (1 - gazeReduction) : amount;
-
+        double realWithOutGaze  = Math.min(baronHealth, amount);
         // 남은 바론 체력보다 더 많은 데미지가 들어갔을 때를 방지해주는 Math.min
-        double realDamage = Math.min(baronHealth, afterGazedAmount);  
+        double realDamage       = Math.min(baronHealth, afterGazedAmount);
+        double gazeLoss         = realWithOutGaze - realDamage;  
         baronHealth -= realDamage;
         damageBySource.merge(source, realDamage, Double::sum);
+        if (gazeLoss > 0) {
+            gazeLossBySource.merge(source, gazeLoss, Double::sum);
+        }
     }
     
     public Map<DamageSource, Double> damageBySource() {
         return Map.copyOf(damageBySource);
+    }
+    
+    public Map<DamageSource, Double> gazeLossBySource() {
+        return Map.copyOf(gazeLossBySource);
     }
 
     public Heimer heimer() {

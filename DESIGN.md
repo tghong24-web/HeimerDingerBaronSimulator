@@ -17,7 +17,8 @@ Java 연습용 프로젝트. 특정 레벨의 바론을 상대로 하이머딩�
 - 처치 가능 여부와 소요 시간
 - 시간에 따른 바론 체력 그래프 (병풍이 없으면 포탑과 하이머 체력도 함께)
 - 딜 출처별 비중: 포탑 평타, 강화 포탑 광선, W, E, 평타, 아이템 효과 (`DamageSource` enum으로 구분, 실제로 들어간 피해만 집계)
-- 실패 시 원인: 하이머 사망, 제한 시간 초과 (포탑 전멸은 실패가 아니다. 포탑은 Q 충전으로 다시 깔 수 있다)
+- 결과(`Outcome`): 처치(KILLED), 제한 시간 초과(TIME_LIMIT), 하이머 사망(HEIMER_DEAD). 포탑 전멸은 실패가 아니다. 포탑은 Q 충전으로 다시 깔 수 있다
+- Baron's Gaze로 줄어든 피해량 (출처별, `gazeLossBySource`). "Gaze가 없었으면 실제로 들어갔을 피해 − 실제로 들어간 피해"로 계산한다. 바론이 어차피 죽는 마지막 한 방에서는 손해가 0이다
 
 ## 2. 딜에 영향을 주는 요소
 
@@ -133,6 +134,8 @@ while (바론 체력 > 0 && 시간 < 제한 && 딜 수단 남음):
 ```
 
 - 각 이벤트는 처리 후 자신의 다음 발생을 큐에 다시 넣는다 (예: `TurretAttackEvent`)
+- 같은 시각의 이벤트는 먼저 예약된 순서대로 처리한다 (`CombatState`가 예약 번호를 붙인다). `PriorityQueue`는 같은 우선순위끼리 순서를 보장하지 않아서, Gaze처럼 순서에 따라 결과가 달라지는 경우가 생긴다. Simulator는 하이머 쪽 공격을 먼저, 바론 평타를 마지막에 예약하므로 0초의 하이머 공격은 Gaze 전에 들어간다
+- 루프는 바론 사망, 하이머 사망, 제한 시간 초과 중 하나로 끝나고, 끝난 뒤에 결과(`Outcome`)를 정한다
 - 고정 틱 방식보다 정확하고, 요소 추가 시 이벤트 클래스만 늘리면 된다
 
 ### 주요 이벤트
@@ -145,7 +148,7 @@ while (바론 체력 > 0 && 시간 < 제한 && 딜 수단 남음):
 - R 쿨타임은 `CombatState`의 `rReadyTime`(R이 다시 준비되는 시각) 하나로 관리한다 (`isRReady`, `useR`)
 - `HeimerAttackEvent`: 하이머 평타
 - `TurretPlaceEvent`: 포탑 (재)설치
-- `BaronAttackEvent`: 현재 어그로 대상에게 피해, 다음 공격 예약
+- `BaronAttackEvent`: 전략에게 대상을 물어 방어력을 적용한 피해를 주고, 맞은 대상을 Gaze 대상으로 기록, 다음 공격 예약 (구현)
 - `DotTickEvent`: 지속 피해
 
 ## 4. 탱킹 모드
@@ -170,7 +173,7 @@ interface TankingStrategy {
 - 기본: 더미는 딜 0, 죽지 않음
 - 추후 옵션: 더미 체력과 방어력 입력. 더미가 죽으면 병풍 없음으로 전환
 
-### 병풍 없음
+### 병풍 없음 (`NoDummyTankingStrategy`, 구현)
 - 바론은 가장 가까운 대상부터 때린다: 먼저 깐 포탑 → 다음 포탑 → … → 포탑이 다 죽으면 하이머. RQ 터렛은 입력에 따라 일반 포탑 앞 또는 뒤
 - Baron's Gaze
   - 포탑이 맞는 중: 그 포탑 하나의 피해만 50%
@@ -186,7 +189,7 @@ interface TankingStrategy {
 model/       Target, Dummy, Turret, Heimer, BaronStats, Item, Rune
 data/        JSON 로더 (패치별 수치)
 calc/        StatGrowth (성장 공식, 바론과 챔피언 공용), BaronScaler (레벨 → 바론 스탯), DamageCalculator (방어력·관통 공식)
-sim/         Simulator, SimulationInput(입력 묶음), SimulatorResult, CombatState, DamageSource(피해 출처 enum), UltimateChoice, UltimateSpec, Event와 구현체, TankingStrategy와 구현체
+sim/         Simulator, SimulationInput(입력 묶음), SimulatorResult, Outcome, CombatState, DamageSource(피해 출처 enum), UltimateChoice, UltimateSpec, RqTurretPosition, Event와 구현체, TankingStrategy와 구현체
 ui/          JavaFX 화면 (입력 패널, 체력 그래프, 결과 요약)
 ```
 
@@ -219,8 +222,8 @@ ui/          JavaFX 화면 (입력 패널, 체력 그래프, 결과 요약)
 2. [x] `DamageCalculator`: 마법 저항력과 관통 공식
 3. [x] 포탑 평타만 도는 최소 시뮬레이터 (콘솔 출력, 모드 3 가정)
 4. [x] 하이머 스킬과 피해 출처별 합계 (`SimulationInput`, W, E, RQ/RW/RE와 R 재사용, `DamageSource`)
-5. [ ] 바론 반격과 `TankingStrategy`: 병풍 있음(완료) → 병풍 없음(포탑 순서, Gaze, 하이머 사망)
-6. [ ] 포탑 사망과 재설치
+5. [x] 바론 반격과 `TankingStrategy`: 병풍 있음, 병풍 없음(포탑 순서, Gaze, 하이머 사망, Gaze 손해 기록)
+6. [ ] 포탑 사망과 재설치, RQ 터렛을 바론의 대상으로 (설치 위치 앞/뒤, RQ 터렛 체력·Gaze)
 7. [ ] 바론 광역기
 8. [ ] 아이템과 룬
 9. [ ] JavaFX UI와 그래프
@@ -252,3 +255,4 @@ ui/          JavaFX 화면 (입력 패널, 체력 그래프, 결과 요약)
 - 2026-10-11: RQ 터렛 구현과 테스트 완료. R 강화 스킬의 쿨타임 공유(RW-W, RE-E), R 쿨타임 시작 시점, 사용 시점(첫 차례)과 재사용 규칙 확정. 막타 옵션 대신 UI 기준선으로 결정
 - 2026-10-11: 구현 4단계 완료. RW·RE(W/E와 쿨타임 공유), R 쿨타임마다 재사용, `RQPlaceEvent`로 RQ 재설치. 시뮬레이터 테스트 37개
 - 2026-10-12: 탱킹 모드를 병풍 유무 두 가지로 단순화(하이머 탱킹 모드, 흡혈 제거). 병풍 있음 구현(`Target`, `Dummy`, `TankingStrategy`, `BaronAttackEvent`). 바론 대상 순서, Baron's Gaze 적용 범위, 실패 조건(하이머 사망) 확정. 포탑 스탯 1/18/20레벨 실측 반영, 하이머 레벨 1~20. 바론 광역기를 별도 단계로 분리
+- 2026-10-12: 구현 5단계 완료. 병풍 없음 전략, `Heimer`·`Turret` 대상, 하이머 사망 시 종료와 `Outcome`, Baron's Gaze(공격자를 `damageBaron`에 전달, 마지막으로 맞은 대상 기록)와 Gaze 손해 출력. 같은 시각 이벤트는 예약 순서대로 처리하도록 확정. RQ 터렛을 바론의 대상으로 만드는 일은 6단계로 이동. 테스트 76개
