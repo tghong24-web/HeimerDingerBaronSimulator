@@ -3,8 +3,13 @@ package com.hongtg.baronsim.sim;
 import com.hongtg.baronsim.data.BaronData;
 import com.hongtg.baronsim.data.DataLoader;
 import com.hongtg.baronsim.model.Dummy;
+import com.hongtg.baronsim.model.Turret;
 import com.hongtg.baronsim.data.HeimerData;
 import com.hongtg.baronsim.model.BaronStats;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import com.hongtg.baronsim.calc.DamageCalculator;
 
 public class Simulator {
@@ -31,10 +36,15 @@ public class Simulator {
                 input.flatPen());
 
         // Q: turret 개수만큼 첫번째 사격 등록
-        for (int i = 0; i < input.turretCount(); i++) {
-            state.schedule(new TurretAttackEvent(0, i, finalQDamage, shotInterval));
-        }
+        double turretHp = heimerData.turret().healthAt(input.heimerLevel(), input.ap());
+        double turretArmor = heimerData.turret().armorAt(input.heimerLevel());
 
+        List<Turret> turrets = new ArrayList<>();
+        for (int i = 0; i < input.turretCount(); i++) {
+            Turret t = new Turret(turretHp, turretArmor);
+            turrets.add(t);
+            state.schedule(new TurretAttackEvent(0, finalQDamage, shotInterval, t));
+        }
         // W 배웠으면 첫번째 로켓과 나머지 4개의 로켓 데미지를 계산 후 0초에 첫 사용 예약
         if (input.wLevel() > 0) {
             HeimerData.RocketsData rocket = heimerData.rockets();
@@ -124,9 +134,9 @@ public class Simulator {
 
         // 바론이 현재 Target에게 평타 넣는 이벤트 시작
         double baronDamage = baron.attackDamage();
-        double baronAttackSpeed = 1 / baron.attackSpeed();
+        double baronAttackInterval = 1 / baron.attackSpeed();
     
-        state.schedule(new BaronAttackEvent(0, baronDamage, baronAttackSpeed));
+        state.schedule(new BaronAttackEvent(0, baronDamage, baronAttackInterval));
 
         // 3.마지막 처리 시각을 담을 변수
         double killSecond = 0;

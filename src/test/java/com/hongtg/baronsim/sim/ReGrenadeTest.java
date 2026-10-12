@@ -23,7 +23,7 @@ class ReGrenadeTest {
 
     private SimulatorResult run(int wLevel, int rLevel, int turretCount, double timeLimit) {
         return simulator.run(new SimulationInput(
-                15, 5, wLevel, 5, rLevel, UltimateChoice.RE, 300, 0, 0, turretCount, timeLimit));
+                15, 13, 5, wLevel, 5, rLevel, UltimateChoice.RE, 300, 0, 0, turretCount, timeLimit));
     }
 
     private double total(SimulatorResult result, DamageSource source) {

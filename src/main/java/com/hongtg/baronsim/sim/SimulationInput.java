@@ -3,6 +3,7 @@ package com.hongtg.baronsim.sim;
 // Simulation을 돌릴 때, 입력하기 편하게 정보들 record 형태로 만들어놓기
 public record SimulationInput(
     int baronLevel, 
+    int heimerLevel,
     int qLevel,
     int wLevel,
     int eLevel,
@@ -17,6 +18,9 @@ public record SimulationInput(
     public SimulationInput {
         if (turretCount < 0 || turretCount > 3) {
             throw new IllegalArgumentException("포탑은 0~3개여야 합니다: " + turretCount);
+        }
+        if (heimerLevel < 1 || heimerLevel > 20) {
+            throw new IllegalArgumentException("하이머딩거 레벨은 1~20이어야 합니다: " + heimerLevel);
         }
         if (timeLimit <= 0) {
             throw new IllegalArgumentException("제한 시간은 0보다 커야 합니다: " + timeLimit);
