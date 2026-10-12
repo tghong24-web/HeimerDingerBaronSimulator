@@ -1,5 +1,7 @@
 package com.hongtg.baronsim.sim;
 
+import java.util.ArrayList;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -22,7 +24,7 @@ class TurretKitsTest {
     private TurretKits runRecharge(int startKits, double restSeconds, double timeLimit) {
         TurretKits kits = new TurretKits(startKits, 3, 20);
         CombatState state = new CombatState(1_000_000, new DummyTankingStrategy(new Dummy(0)),
-                new Heimer(2000, 50), 0.5, kits);
+                new Heimer(2000, 50), 0.5, kits, new ArrayList<>());
         if (!kits.isFull()) {
             kits.setRecharging(true);
             state.schedule(new KitRechargeEvent(restSeconds));

@@ -2,11 +2,13 @@ package com.hongtg.baronsim.sim;
 
 import java.util.Map;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
 import com.hongtg.baronsim.model.Heimer;
 import com.hongtg.baronsim.model.Target;
+import com.hongtg.baronsim.model.Turret;
 
 public class CombatState {
     private double baronHealth;
@@ -21,13 +23,15 @@ public class CombatState {
     private long nextSeq = 0;
     private final PriorityQueue<Scheduled> queue;
     private final TurretKits turretKits;
+    private final List<Turret> turrets;
 
-    public CombatState(double baronStartHealth, TankingStrategy strategy, Heimer heimer, double gazeReduction, TurretKits turretKits){
+    public CombatState(double baronStartHealth, TankingStrategy strategy, Heimer heimer, double gazeReduction, TurretKits turretKits, List<Turret> turrets){
         this.baronHealth = baronStartHealth;
         this.strategy = strategy;
         this.heimer = heimer;
         this.gazeReduction = gazeReduction;
         this.turretKits = turretKits;
+        this.turrets = turrets;
         queue = new PriorityQueue<>(Comparator.comparingDouble((Scheduled s) -> s.event().time()).thenComparingLong(Scheduled::seq));
     }
 
@@ -61,6 +65,10 @@ public class CombatState {
         if (gazeLoss > 0) {
             gazeLossBySource.merge(source, gazeLoss, Double::sum);
         }
+    }
+    
+    public List<Turret> turrets() {
+        return turrets;
     }
 
     public TurretKits turretKits() {

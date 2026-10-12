@@ -1,5 +1,7 @@
 package com.hongtg.baronsim.sim;
 
+import java.util.ArrayList;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
@@ -27,7 +29,7 @@ class BaronGazeTest {
     private final Turret t2 = new Turret(500, 50);
 
     private CombatState state(double baronHealth) {
-        return new CombatState(baronHealth, new NoDummyTankingStrategy(List.of(t1, t2), heimer), heimer, 0.5, new TurretKits(3, 3, 20));
+        return new CombatState(baronHealth, new NoDummyTankingStrategy(List.of(t1, t2), heimer), heimer, 0.5, new TurretKits(3, 3, 20), new ArrayList<>());
     }
 
     private double loss(CombatState s, DamageSource source) {
@@ -79,7 +81,7 @@ class BaronGazeTest {
 
     @Test
     void gazeOnDummyReducesNothing() {
-        CombatState s = new CombatState(10_000, new DummyTankingStrategy(new Dummy(0)), heimer, 0.5, new TurretKits(3, 3, 20));
+        CombatState s = new CombatState(10_000, new DummyTankingStrategy(new Dummy(0)), heimer, 0.5, new TurretKits(3, 3, 20), new ArrayList<>());
         s.setGazeTarget(new Dummy(0));
         s.damageBaron(DamageSource.ROCKETS, 100, heimer);
 
