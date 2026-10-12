@@ -14,8 +14,8 @@ public record RQTurretEvent(
     public void apply(CombatState state) {
         // 1. 바론 체력 깎기(일반 평타면 SHOT, 광선이면 BEAM)
         switch (rqData.attackAt(attackIndex)) {
-            case SHOT -> state.damageBaron(DamageSource.RQ_TURRET_SHOT, shotDamage);
-            case BEAM -> state.damageBaron(DamageSource.RQ_TURRET_BEAM, beamDamage);
+            case SHOT -> state.damageBaron(DamageSource.RQ_TURRET_SHOT, shotDamage, state.heimer());
+            case BEAM -> state.damageBaron(DamageSource.RQ_TURRET_BEAM, beamDamage, state.heimer());
         }
 
         // 2. 다음 공격 예약: 공격 8회까지, 새 RQTurretEvent를 만들어 state.schedule(...)

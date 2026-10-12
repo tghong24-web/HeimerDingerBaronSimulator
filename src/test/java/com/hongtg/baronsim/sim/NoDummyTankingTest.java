@@ -42,7 +42,7 @@ class NoDummyTankingTest {
 
     /** 바론 평타만 timeLimit초까지 돌린다 (하이머 스킬, 포탑 공격 없음). */
     private void runBaronAttacks(List<Turret> turrets, double timeLimit) {
-        CombatState state = new CombatState(1_000_000, new NoDummyTankingStrategy(turrets, heimer));
+        CombatState state = new CombatState(1_000_000, new NoDummyTankingStrategy(turrets, heimer), heimer, 0.5);
         state.schedule(new BaronAttackEvent(0, BARON_AD, INTERVAL));
         while (state.hasEvents()) {
             Event e = state.nextEvent();
@@ -103,16 +103,23 @@ class NoDummyTankingTest {
         assertEquals(HEIMER_HP - HIT_ON_HEIMER, heimer.health(), 0.01);
     }
 
+    /**
+     * 포탑 사망 시각까지 쏜 횟수: 포탑1 9발, 포탑2 20발, 포탑3 31발 = 60발
+     * 포탑 평타 한 발 = (23 + 0.35 * 300) * 100/185.06 ≈ 69.1668
+     * Baron's Gaze: 바론이 그 포탑을 때린 뒤부터 그 포탑의 평타는 50%.
+     *   포탑1: 0초 1발은 정상(바론 첫 평타 전), 0.57~4.57초 8발은 절반
+     *   포탑2: 6.4초 전까지 12발 정상(Gaze는 죽은 포탑1에 남아 있음), 그 뒤 8발 절반
+     *   포탑3: 12.8초 전까지 23발 정상, 그 뒤 8발 절반
+     *   → 정상 36발 + 절반 24발(= 12발 분량) = 48발 분량
+     */
     @Test
     void deadTurretsStopShooting() {
-        // 포탑 사망 시각까지 쏜 횟수: 포탑1 9발, 포탑2 20발, 포탑3 31발 = 60발
-        // 포탑 평타 한 발 = (23 + 0.35 * 300) * 100/185.06 ≈ 69.1668
         SimulatorResult result = new Simulator().run(new SimulationInput(
                 15, 18, 5, 0, 0, 0, UltimateChoice.NONE, 300, 0, 0, 3, RqTurretPosition.FRONT, false, 60));
 
         assertFalse(result.killed());
         assertEquals(Outcome.HEIMER_DEAD, result.outcome());
-        assertEquals(60 * 69.16676, result.damageBySource().get(DamageSource.TURRET_SHOT), 0.05);
+        assertEquals(48 * 69.16676, result.damageBySource().get(DamageSource.TURRET_SHOT), 0.05);
     }
 
     @Test
@@ -139,13 +146,15 @@ class NoDummyTankingTest {
     void heimerSkillsStopWhenHeimerDies() {
         // 포탑 0개: 하이머가 0초부터 맞아서 16.0초(11번째 평타)에 사망
         // 그 전까지 W는 0, 7, 14초에 3번(한 번 ≈ 312.87), E는 0, 11초에 2번(한 번 ≈ 216.15)
+        // Baron's Gaze가 하이머에게 걸리므로 0초(바론 첫 평타 전)를 빼고 전부 50%
+        //   W = 312.87 + 156.44 + 156.44 = 2 × 312.87,  E = 216.15 + 108.07 = 1.5 × 216.15
         SimulatorResult result = new Simulator().run(new SimulationInput(
                 15, 18, 5, 5, 5, 0, UltimateChoice.NONE, 300, 0, 0, 0, RqTurretPosition.FRONT, false, 300));
 
         assertEquals(Outcome.HEIMER_DEAD, result.outcome());
         assertEquals(16.0, result.killTime(), 0.001);
-        assertEquals(3 * 312.8715, result.damageBySource().get(DamageSource.ROCKETS), 0.01);
-        assertEquals(2 * 216.1461, result.damageBySource().get(DamageSource.GRENADE), 0.01);
+        assertEquals(2 * 312.8715, result.damageBySource().get(DamageSource.ROCKETS), 0.01);
+        assertEquals(1.5 * 216.1461, result.damageBySource().get(DamageSource.GRENADE), 0.01);
     }
 
     @Test

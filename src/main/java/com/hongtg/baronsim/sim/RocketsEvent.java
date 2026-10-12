@@ -8,11 +8,11 @@ public record RocketsEvent(double time, double damage, double coolDown, Ultimate
     public void apply(CombatState state) {
         // 1. 바론 체력 깎기
         if (rw != null && state.isRReady(time)) {   //RW를 선택했고, R쿨이 돌았다면
-            state.damageBaron(DamageSource.RW_ROCKETS, rw.damage());
+            state.damageBaron(DamageSource.RW_ROCKETS, rw.damage(), state.heimer());
             state.useR(time, rw.cooldown());
         }
         else {  //기본적으론 일반 W
-            state.damageBaron(DamageSource.ROCKETS, damage);
+            state.damageBaron(DamageSource.ROCKETS, damage, state.heimer());
         }        
         
         // 2. 다음 공격 예약: 새 RocketsEvent를 만들어 state.schedule(...)

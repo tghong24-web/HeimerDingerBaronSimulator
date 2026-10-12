@@ -56,7 +56,7 @@ public class Simulator {
         }
 
         // 입력한 전략에 맞는 state 생성
-        CombatState state = new CombatState(baron.health(), strategy);
+        CombatState state = new CombatState(baron.health(), strategy, heimer, baronData.gaze().damageReduction());
 
         for (Turret t : turrets) {
             state.schedule(new TurretAttackEvent(0, finalQDamage, shotInterval, t));

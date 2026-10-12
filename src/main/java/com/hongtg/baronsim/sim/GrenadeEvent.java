@@ -9,11 +9,11 @@ public record GrenadeEvent(double time, double damage, double coolDown, Ultimate
     public void apply(CombatState state) {
         // 1. 바론 체력 깎기
         if (re != null && state.isRReady(time)) {   //RE를 선택했고, R쿨이 돌았다면
-            state.damageBaron(DamageSource.RE_GRENADE, re.damage());
+            state.damageBaron(DamageSource.RE_GRENADE, re.damage(), state.heimer());
             state.useR(time, re.cooldown());
         }
         else {  //기본적으론 일반 E
-            state.damageBaron(DamageSource.GRENADE, damage);
+            state.damageBaron(DamageSource.GRENADE, damage, state.heimer());
         }        
         
         // 2. 다음 공격 예약: 새 GrenadeEvent를 만들어 state.schedule(...)

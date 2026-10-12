@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import com.hongtg.baronsim.model.Dummy;
+import com.hongtg.baronsim.model.Heimer;
 
 /**
  * 바론 평타 이벤트 테스트 (모드 3: 병풍 더미).
@@ -21,7 +22,7 @@ class BaronAttackEventTest {
     private Dummy runAttacks(double dummyArmor, double timeLimit) {
         Dummy dummy = new Dummy(dummyArmor);
         // 바론 체력은 충분히 크게: 바론이 죽어서 멈추는 일이 없도록
-        CombatState state = new CombatState(1_000_000, new DummyTankingStrategy(dummy));
+        CombatState state = new CombatState(1_000_000, new DummyTankingStrategy(dummy), new Heimer(2000, 50), 0.5);
         state.schedule(new BaronAttackEvent(0, BARON_AD, INTERVAL));
 
         while (state.hasEvents()) {

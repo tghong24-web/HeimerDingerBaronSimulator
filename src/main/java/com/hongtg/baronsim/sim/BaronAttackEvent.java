@@ -16,6 +16,7 @@ public record BaronAttackEvent(
         Target target = state.tankingStrategy().currentTarget(state);        
         double finalDamage = DamageCalculator.reducedDamage(baronDamage, target.armor(), 0, 0);
         target.takeDamage(finalDamage);
+        state.setGazeTarget(target);
 
         // baronAttackSpeed 후 다음 공격 예약
         BaronAttackEvent nextAttack = new BaronAttackEvent(time + baronAttackInterval, baronDamage, baronAttackInterval);
