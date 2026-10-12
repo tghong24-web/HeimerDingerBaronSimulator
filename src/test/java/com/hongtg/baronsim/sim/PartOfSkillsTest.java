@@ -35,8 +35,6 @@ public class PartOfSkillsTest {
     void WhenNotWESkills() {
         SimulatorResult result = run(0, 0, 3);
 
-        double total = totalDamage(result);
-
         assertTrue(result.killed());
         assertFalse(result.damageBySource().containsKey(DamageSource.ROCKETS));
         assertFalse(result.damageBySource().containsKey(DamageSource.GRENADE));
@@ -45,8 +43,6 @@ public class PartOfSkillsTest {
     @Test 
     void WhenWSkillNotESkill() {
         SimulatorResult result = run(5, 0, 3);
-
-        double total = totalDamage(result);
 
         assertTrue(result.killed());
         assertTrue(result.damageBySource().get(DamageSource.ROCKETS) > 0);

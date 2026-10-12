@@ -15,7 +15,7 @@ public class Simulator {
 
         BaronStats baron = baronData.toScaler().statsAt(input.baronLevel());
 
-        // 1.CombatState에 바론 체력 받기
+        // 1.CombatState에 바론 체력 받기 + Dummy 생성
         Dummy dummy = new Dummy(0);
         CombatState state = new CombatState(baron.health(), new DummyTankingStrategy(dummy));
 
@@ -27,7 +27,7 @@ public class Simulator {
         double shotInterval = turret.attackIntervalSeconds();
 
         double baseQDamage = shotDamage + shotAP * input.ap();
-        double finalQDamage = DamageCalculator.magicDamage(baseQDamage, baron.magicResist(), input.percentPen(),
+        double finalQDamage = DamageCalculator.reducedDamage(baseQDamage, baron.magicResist(), input.percentPen(),
                 input.flatPen());
 
         // Q: turret 개수만큼 첫번째 사격 등록
@@ -45,7 +45,7 @@ public class Simulator {
             double rocketCool = rocket.cooldownAtRank(input.wLevel());
 
             double baseWDamage = rocketDamage + rocketAP * input.ap();
-            double finalWDamage = DamageCalculator.magicDamage(baseWDamage, baron.magicResist(), input.percentPen(), input.flatPen());
+            double finalWDamage = DamageCalculator.reducedDamage(baseWDamage, baron.magicResist(), input.percentPen(), input.flatPen());
             
             UltimateSpec rw = null;
             if (input.ultimate() == UltimateChoice.RW) {
@@ -65,7 +65,7 @@ public class Simulator {
                 double baseRWDamage = rFirstRocketDamage + rFirstRocketAP * input.ap()
                                     + (r2to5RocketDamage + r2to5RocketAP * input.ap()) * rRocket2to5Count
                                     + (rExtraRocketDamage + rExtraRocketAP * input.ap()) * rRocketExtraCount;
-                double finalRWDamage = DamageCalculator.magicDamage(baseRWDamage, baron.magicResist(), input.percentPen(), input.flatPen());
+                double finalRWDamage = DamageCalculator.reducedDamage(baseRWDamage, baron.magicResist(), input.percentPen(), input.flatPen());
 
                 rw = new UltimateSpec(finalRWDamage, heimerData.upgrade().cooldownAtRank(input.rLevel()));
             }
@@ -81,7 +81,7 @@ public class Simulator {
             double grenadeCool = grenade.cooldownSeconds();
 
             double baseEDamage = grenadeDamage + grenadeAP * input.ap();
-            double finalEDamage = DamageCalculator.magicDamage(baseEDamage, baron.magicResist(), input.percentPen(),
+            double finalEDamage = DamageCalculator.reducedDamage(baseEDamage, baron.magicResist(), input.percentPen(),
                     input.flatPen());
 
             UltimateSpec re = null;
@@ -93,7 +93,7 @@ public class Simulator {
                 double rGrenadeAP = rGrenade.apRatio();
 
                 double baseREDamage = (rGrenadeDamage + rGrenadeAP * input.ap()) * rGrenadeHits;
-                double finalREDamage = DamageCalculator.magicDamage(baseREDamage, baron.magicResist(), input.percentPen(), input.flatPen());
+                double finalREDamage = DamageCalculator.reducedDamage(baseREDamage, baron.magicResist(), input.percentPen(), input.flatPen());
                 
                 re = new UltimateSpec(finalREDamage, heimerData.upgrade().cooldownAtRank(input.rLevel()));
             }
@@ -113,15 +113,20 @@ public class Simulator {
 
                 double baseRqShotDamage = rturretShotDamage + rturretShotAp * input.ap();
                 double baseRqBeamDamage = rturretBeamDamage + rturretBeamAp * input.ap();
-                double finalRqShotDamage = DamageCalculator.magicDamage(baseRqShotDamage, baron.magicResist(), input.percentPen(), input.flatPen());
-                double finalRqBeamDamage = DamageCalculator.magicDamage(baseRqBeamDamage, baron.magicResist(), input.percentPen(), input.flatPen());
+                double finalRqShotDamage = DamageCalculator.reducedDamage(baseRqShotDamage, baron.magicResist(), input.percentPen(), input.flatPen());
+                double finalRqBeamDamage = DamageCalculator.reducedDamage(baseRqBeamDamage, baron.magicResist(), input.percentPen(), input.flatPen());
 
 
                 // 쿨이 돌 때마다 RQ 설치예약
                 state.schedule(new RQPlaceEvent(0, finalRqShotDamage, finalRqBeamDamage, rturret, heimerData.upgrade().cooldownAtRank(input.rLevel())));
             }
         }
+
+        // 바론이 현재 Target에게 평타 넣는 이벤트 시작
+        double baronDamage = baron.attackDamage();
+        double baronAttackSpeed = 1 / baron.attackSpeed();
     
+        state.schedule(new BaronAttackEvent(0, baronDamage, baronAttackSpeed));
 
         // 3.마지막 처리 시각을 담을 변수
         double killSecond = 0;
