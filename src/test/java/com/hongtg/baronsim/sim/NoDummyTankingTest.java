@@ -111,6 +111,7 @@ class NoDummyTankingTest {
                 15, 18, 5, 0, 0, 0, UltimateChoice.NONE, 300, 0, 0, 3, RqTurretPosition.FRONT, false, 60));
 
         assertFalse(result.killed());
+        assertEquals(Outcome.HEIMER_DEAD, result.outcome());
         assertEquals(60 * 69.16676, result.damageBySource().get(DamageSource.TURRET_SHOT), 0.05);
     }
 
@@ -122,5 +123,39 @@ class NoDummyTankingTest {
 
         assertTrue(result.killed());
         assertEquals(50.86, result.killTime(), 0.01);
+    }
+
+    @Test
+    void heimerDeathEndsSimulation() {
+        // 포탑 3개가 17.6초까지 다 죽고, 하이머는 35.2초에 11번째 평타로 사망 → 거기서 끝
+        SimulatorResult result = new Simulator().run(new SimulationInput(
+                15, 18, 5, 0, 0, 0, UltimateChoice.NONE, 300, 0, 0, 3, RqTurretPosition.FRONT, false, 300));
+
+        assertEquals(Outcome.HEIMER_DEAD, result.outcome());
+        assertEquals(35.2, result.killTime(), 0.001);
+    }
+
+    @Test
+    void heimerSkillsStopWhenHeimerDies() {
+        // 포탑 0개: 하이머가 0초부터 맞아서 16.0초(11번째 평타)에 사망
+        // 그 전까지 W는 0, 7, 14초에 3번(한 번 ≈ 312.87), E는 0, 11초에 2번(한 번 ≈ 216.15)
+        SimulatorResult result = new Simulator().run(new SimulationInput(
+                15, 18, 5, 5, 5, 0, UltimateChoice.NONE, 300, 0, 0, 0, RqTurretPosition.FRONT, false, 300));
+
+        assertEquals(Outcome.HEIMER_DEAD, result.outcome());
+        assertEquals(16.0, result.killTime(), 0.001);
+        assertEquals(3 * 312.8715, result.damageBySource().get(DamageSource.ROCKETS), 0.01);
+        assertEquals(2 * 216.1461, result.damageBySource().get(DamageSource.GRENADE), 0.01);
+    }
+
+    @Test
+    void outcomeWithDummy() {
+        SimulatorResult killed = new Simulator().run(new SimulationInput(
+                15, 18, 5, 0, 0, 0, UltimateChoice.NONE, 300, 0, 0, 3, RqTurretPosition.FRONT, true, 300));
+        SimulatorResult timeOut = new Simulator().run(new SimulationInput(
+                15, 18, 5, 0, 0, 0, UltimateChoice.NONE, 300, 0, 0, 3, RqTurretPosition.FRONT, true, 30));
+
+        assertEquals(Outcome.KILLED, killed.outcome());
+        assertEquals(Outcome.TIME_LIMIT, timeOut.outcome(), "병풍이 있으면 하이머는 죽지 않는다");
     }
 }

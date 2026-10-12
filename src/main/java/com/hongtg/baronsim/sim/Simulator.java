@@ -51,30 +51,31 @@ public class Simulator {
         TankingStrategy strategy;
         if (input.hasDummy()) {
             strategy = new DummyTankingStrategy(new Dummy(0));
-        }
-        else {
+        } else {
             strategy = new NoDummyTankingStrategy(turrets, heimer);
         }
 
         // 입력한 전략에 맞는 state 생성
         CombatState state = new CombatState(baron.health(), strategy);
-        
-        for (Turret t: turrets) {
+
+        for (Turret t : turrets) {
             state.schedule(new TurretAttackEvent(0, finalQDamage, shotInterval, t));
         }
-         
+
         // W 배웠으면 첫번째 로켓과 나머지 4개의 로켓 데미지를 계산 후 0초에 첫 사용 예약
         if (input.wLevel() > 0) {
             HeimerData.RocketsData rocket = heimerData.rockets();
-            
+
             int extraRockets = rocket.rocketCount() - 1;
-            double rocketDamage = rocket.firstRocketDamageAtRank(input.wLevel()) + extraRockets * rocket.extraRocketDamageAtRank(input.wLevel());
+            double rocketDamage = rocket.firstRocketDamageAtRank(input.wLevel())
+                    + extraRockets * rocket.extraRocketDamageAtRank(input.wLevel());
             double rocketAP = rocket.firstRocketApRatio() + extraRockets * rocket.extraRocketApRatio();
             double rocketCool = rocket.cooldownAtRank(input.wLevel());
 
             double baseWDamage = rocketDamage + rocketAP * input.ap();
-            double finalWDamage = DamageCalculator.reducedDamage(baseWDamage, baron.magicResist(), input.percentPen(), input.flatPen());
-            
+            double finalWDamage = DamageCalculator.reducedDamage(baseWDamage, baron.magicResist(), input.percentPen(),
+                    input.flatPen());
+
             UltimateSpec rw = null;
             if (input.ultimate() == UltimateChoice.RW) {
                 HeimerData.RwRocketsData rRocket = heimerData.rwRockets();
@@ -82,7 +83,7 @@ public class Simulator {
                 int rRocket2to5Count = 4;
                 // 첫발 (1개) + 2~5번째 (4개) 를 뺀 나머지 로켓 수
                 int rRocketExtraCount = rRocket.rocketCount() - 5;
-                
+
                 double rFirstRocketDamage = rRocket.firstRocketDamageAtRank(input.rLevel());
                 double rFirstRocketAP = rRocket.firstRocketApRatio();
                 double r2to5RocketDamage = rRocket.rockets2to5DamageAtRank(input.rLevel());
@@ -91,9 +92,10 @@ public class Simulator {
                 double rExtraRocketAP = rRocket.laterRocketApRatio();
 
                 double baseRWDamage = rFirstRocketDamage + rFirstRocketAP * input.ap()
-                                    + (r2to5RocketDamage + r2to5RocketAP * input.ap()) * rRocket2to5Count
-                                    + (rExtraRocketDamage + rExtraRocketAP * input.ap()) * rRocketExtraCount;
-                double finalRWDamage = DamageCalculator.reducedDamage(baseRWDamage, baron.magicResist(), input.percentPen(), input.flatPen());
+                        + (r2to5RocketDamage + r2to5RocketAP * input.ap()) * rRocket2to5Count
+                        + (rExtraRocketDamage + rExtraRocketAP * input.ap()) * rRocketExtraCount;
+                double finalRWDamage = DamageCalculator.reducedDamage(baseRWDamage, baron.magicResist(),
+                        input.percentPen(), input.flatPen());
 
                 rw = new UltimateSpec(finalRWDamage, heimerData.upgrade().cooldownAtRank(input.rLevel()));
             }
@@ -121,8 +123,9 @@ public class Simulator {
                 double rGrenadeAP = rGrenade.apRatio();
 
                 double baseREDamage = (rGrenadeDamage + rGrenadeAP * input.ap()) * rGrenadeHits;
-                double finalREDamage = DamageCalculator.reducedDamage(baseREDamage, baron.magicResist(), input.percentPen(), input.flatPen());
-                
+                double finalREDamage = DamageCalculator.reducedDamage(baseREDamage, baron.magicResist(),
+                        input.percentPen(), input.flatPen());
+
                 re = new UltimateSpec(finalREDamage, heimerData.upgrade().cooldownAtRank(input.rLevel()));
             }
 
@@ -141,33 +144,45 @@ public class Simulator {
 
                 double baseRqShotDamage = rturretShotDamage + rturretShotAp * input.ap();
                 double baseRqBeamDamage = rturretBeamDamage + rturretBeamAp * input.ap();
-                double finalRqShotDamage = DamageCalculator.reducedDamage(baseRqShotDamage, baron.magicResist(), input.percentPen(), input.flatPen());
-                double finalRqBeamDamage = DamageCalculator.reducedDamage(baseRqBeamDamage, baron.magicResist(), input.percentPen(), input.flatPen());
-
+                double finalRqShotDamage = DamageCalculator.reducedDamage(baseRqShotDamage, baron.magicResist(),
+                        input.percentPen(), input.flatPen());
+                double finalRqBeamDamage = DamageCalculator.reducedDamage(baseRqBeamDamage, baron.magicResist(),
+                        input.percentPen(), input.flatPen());
 
                 // 쿨이 돌 때마다 RQ 설치예약
-                state.schedule(new RQPlaceEvent(0, finalRqShotDamage, finalRqBeamDamage, rturret, heimerData.upgrade().cooldownAtRank(input.rLevel())));
+                state.schedule(new RQPlaceEvent(0, finalRqShotDamage, finalRqBeamDamage, rturret,
+                        heimerData.upgrade().cooldownAtRank(input.rLevel())));
             }
         }
 
         double baronDamage = baron.attackDamage();
         double baronAttackInterval = 1 / baron.attackSpeed();
-    
+
         state.schedule(new BaronAttackEvent(0, baronDamage, baronAttackInterval));
 
         // 3.마지막 처리 시각을 담을 변수
         double killSecond = 0;
 
         // 4.바론이 죽을 때까지 이벤트 하나씩 꺼내기
-        while (state.hasEvents() && !state.isBaronDead()) {
+        while (state.hasEvents() && !state.isBaronDead() && !heimer.isDead()) {
             Event e = state.nextEvent();
-            if (e.time() > input.timeLimit())
+            if (e.time() > input.timeLimit()) {
                 break;
+            }
             killSecond = e.time();
-
             e.apply(state);
         }
 
-        return new SimulatorResult(state.isBaronDead(), killSecond, state.damageBySource());
+        // 루프가 왜 끝났는지 여기서 한 번에 판단
+        Outcome outcome;
+        if (state.isBaronDead()) {
+            outcome = Outcome.KILLED;
+        } else if (heimer.isDead()) {
+            outcome = Outcome.HEIMER_DEAD;
+        } else {
+            outcome = Outcome.TIME_LIMIT;
+        }
+
+        return new SimulatorResult(outcome, killSecond, state.damageBySource());
     }
 }
