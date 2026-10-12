@@ -27,7 +27,7 @@ class BaronGazeTest {
     private final Turret t2 = new Turret(500, 50);
 
     private CombatState state(double baronHealth) {
-        return new CombatState(baronHealth, new NoDummyTankingStrategy(List.of(t1, t2), heimer), heimer, 0.5);
+        return new CombatState(baronHealth, new NoDummyTankingStrategy(List.of(t1, t2), heimer), heimer, 0.5, new TurretKits(3, 3, 20));
     }
 
     private double loss(CombatState s, DamageSource source) {
@@ -79,7 +79,7 @@ class BaronGazeTest {
 
     @Test
     void gazeOnDummyReducesNothing() {
-        CombatState s = new CombatState(10_000, new DummyTankingStrategy(new Dummy(0)), heimer, 0.5);
+        CombatState s = new CombatState(10_000, new DummyTankingStrategy(new Dummy(0)), heimer, 0.5, new TurretKits(3, 3, 20));
         s.setGazeTarget(new Dummy(0));
         s.damageBaron(DamageSource.ROCKETS, 100, heimer);
 
@@ -115,7 +115,7 @@ class BaronGazeTest {
     void turretShotsLostToGaze() {
         // 포탑 3개, 병풍 없음, 하이머 18레벨: 60발 중 24발이 Gaze로 절반 → 손해 12발 분량
         SimulatorResult result = new Simulator().run(new SimulationInput(
-                15, 18, 5, 0, 0, 0, UltimateChoice.NONE, 300, 0, 0, 3, RqTurretPosition.FRONT, false, 300));
+                15, 18, 5, 0, 0, 0, UltimateChoice.NONE, 300, 0, 0, 3, 0, 20, RqTurretPosition.FRONT, false, 300));
 
         assertEquals(12 * Q, result.gazeLossBySource().get(DamageSource.TURRET_SHOT), 0.05);
         // 들어간 딜 + 잃은 딜 = Gaze가 없었을 때의 딜(60발)
@@ -127,7 +127,7 @@ class BaronGazeTest {
     void skillsLostToGazeOnHeimer() {
         // 포탑 0개: W 3번 중 7·14초 2번이 절반 → 손해 W 1번 분량, E 2번 중 11초 1번이 절반 → 손해 E 0.5번 분량
         SimulatorResult result = new Simulator().run(new SimulationInput(
-                15, 18, 5, 5, 5, 0, UltimateChoice.NONE, 300, 0, 0, 0, RqTurretPosition.FRONT, false, 300));
+                15, 18, 5, 5, 5, 0, UltimateChoice.NONE, 300, 0, 0, 0, 0, 20, RqTurretPosition.FRONT, false, 300));
 
         assertEquals(W, result.gazeLossBySource().get(DamageSource.ROCKETS), 0.01);
         assertEquals(0.5 * E, result.gazeLossBySource().get(DamageSource.GRENADE), 0.01);
@@ -136,7 +136,7 @@ class BaronGazeTest {
     @Test
     void noGazeLossWithDummy() {
         SimulatorResult result = new Simulator().run(new SimulationInput(
-                15, 18, 5, 5, 5, 0, UltimateChoice.NONE, 300, 0, 0, 3, RqTurretPosition.FRONT, true, 300));
+                15, 18, 5, 5, 5, 0, UltimateChoice.NONE, 300, 0, 0, 3, 0, 20, RqTurretPosition.FRONT, true, 300));
 
         double totalLoss = result.gazeLossBySource().values().stream().mapToDouble(Double::doubleValue).sum();
         assertEquals(0, totalLoss, 0.0001);

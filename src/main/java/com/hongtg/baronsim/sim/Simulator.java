@@ -41,6 +41,9 @@ public class Simulator {
         double turretHp = heimerData.turret().healthAt(input.heimerLevel(), input.ap());
         double turretArmor = heimerData.turret().armorAt(input.heimerLevel());
 
+        // 현재 터렛키트의 상태 생성
+        TurretKits turretKits = new TurretKits((input.currentKitCount()), heimerData.turret().maxKits(), heimerData.turret().kitRechargeSeconds());
+
         List<Turret> turrets = new ArrayList<>();
         for (int i = 0; i < input.turretCount(); i++) {
             Turret t = new Turret(turretHp, turretArmor);
@@ -56,7 +59,12 @@ public class Simulator {
         }
 
         // 입력한 전략에 맞는 state 생성
-        CombatState state = new CombatState(baron.health(), strategy, heimer, baronData.gaze().damageReduction());
+        CombatState state = new CombatState(baron.health(), strategy, heimer, baronData.gaze().damageReduction(), turretKits);
+        
+        if(!turretKits.isFull()) {
+            turretKits.setRecharging(true);
+            state.schedule(new KitRechargeEvent(input.restKitChargeSecond()));
+        }
 
         for (Turret t : turrets) {
             state.schedule(new TurretAttackEvent(0, finalQDamage, shotInterval, t));

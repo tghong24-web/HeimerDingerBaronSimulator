@@ -20,12 +20,14 @@ public class CombatState {
     private record Scheduled(Event event, long seq) { }
     private long nextSeq = 0;
     private final PriorityQueue<Scheduled> queue;
+    private final TurretKits turretKits;
 
-    public CombatState(double baronStartHealth, TankingStrategy strategy, Heimer heimer, double gazeReduction){
+    public CombatState(double baronStartHealth, TankingStrategy strategy, Heimer heimer, double gazeReduction, TurretKits turretKits){
         this.baronHealth = baronStartHealth;
         this.strategy = strategy;
         this.heimer = heimer;
         this.gazeReduction = gazeReduction;
+        this.turretKits = turretKits;
         queue = new PriorityQueue<>(Comparator.comparingDouble((Scheduled s) -> s.event().time()).thenComparingLong(Scheduled::seq));
     }
 
@@ -50,6 +52,7 @@ public class CombatState {
         boolean gazed = gazeTarget != null && (gazeTarget == attacker || gazeTarget instanceof Heimer);
         double afterGazedAmount = gazed ? amount * (1 - gazeReduction) : amount;
         double realWithOutGaze  = Math.min(baronHealth, amount);
+        
         // 남은 바론 체력보다 더 많은 데미지가 들어갔을 때를 방지해주는 Math.min
         double realDamage       = Math.min(baronHealth, afterGazedAmount);
         double gazeLoss         = realWithOutGaze - realDamage;  
@@ -59,6 +62,10 @@ public class CombatState {
             gazeLossBySource.merge(source, gazeLoss, Double::sum);
         }
     }
+
+    public TurretKits turretKits() {
+        return turretKits;
+    } 
     
     public Map<DamageSource, Double> damageBySource() {
         return Map.copyOf(damageBySource);

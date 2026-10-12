@@ -13,6 +13,8 @@ public record SimulationInput(
     double percentPen,
     double flatPen,
     int turretCount,
+    int currentKitCount,
+    double restKitChargeSecond,
     RqTurretPosition rqPosition,
     boolean hasDummy,
     double timeLimit) {
@@ -20,6 +22,15 @@ public record SimulationInput(
     public SimulationInput {
         if (turretCount < 0 || turretCount > 3) {
             throw new IllegalArgumentException("포탑은 0~3개여야 합니다: " + turretCount);
+        }
+        if (currentKitCount < 0 || currentKitCount > 3) {
+            throw new IllegalArgumentException("포탑키트 개수는 0~3개여야 합니다: " + currentKitCount);
+        }
+        if (restKitChargeSecond < 0 || restKitChargeSecond > 20) {
+            throw new IllegalArgumentException("키트 충전시간은 0~20초이어야 합니다: " + restKitChargeSecond);
+        }
+        if (currentKitCount == 3) {
+            restKitChargeSecond = 0;
         }
         if (heimerLevel < 1 || heimerLevel > 20) {
             throw new IllegalArgumentException("하이머딩거 레벨은 1~20이어야 합니다: " + heimerLevel);

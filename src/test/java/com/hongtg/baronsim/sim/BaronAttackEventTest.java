@@ -22,7 +22,7 @@ class BaronAttackEventTest {
     private Dummy runAttacks(double dummyArmor, double timeLimit) {
         Dummy dummy = new Dummy(dummyArmor);
         // 바론 체력은 충분히 크게: 바론이 죽어서 멈추는 일이 없도록
-        CombatState state = new CombatState(1_000_000, new DummyTankingStrategy(dummy), new Heimer(2000, 50), 0.5);
+        CombatState state = new CombatState(1_000_000, new DummyTankingStrategy(dummy), new Heimer(2000, 50), 0.5, new TurretKits(3, 3, 20));
         state.schedule(new BaronAttackEvent(0, BARON_AD, INTERVAL));
 
         while (state.hasEvents()) {
@@ -71,7 +71,7 @@ class BaronAttackEventTest {
     void dummyDoesNotChangeKillTime() {
         // 모드 3에서는 바론 반격이 있어도 처치 시간이 그대로여야 한다 (포탑 3개: 50.86초)
         SimulatorResult result = new Simulator().run(new SimulationInput(
-                15, 13, 5, 0, 0, 0, UltimateChoice.NONE, 300, 0, 0, 3, RqTurretPosition.FRONT, true, 300));
+                15, 13, 5, 0, 0, 0, UltimateChoice.NONE, 300, 0, 0, 3, 0, 20, RqTurretPosition.FRONT, true, 300));
 
         assertEquals(50.86, result.killTime(), 0.01);
     }
