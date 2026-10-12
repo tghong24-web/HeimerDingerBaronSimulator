@@ -2,6 +2,7 @@ package com.hongtg.baronsim.sim;
 
 import com.hongtg.baronsim.data.BaronData;
 import com.hongtg.baronsim.data.DataLoader;
+import com.hongtg.baronsim.model.Dummy;
 import com.hongtg.baronsim.data.HeimerData;
 import com.hongtg.baronsim.model.BaronStats;
 import com.hongtg.baronsim.calc.DamageCalculator;
@@ -15,7 +16,8 @@ public class Simulator {
         BaronStats baron = baronData.toScaler().statsAt(input.baronLevel());
 
         // 1.CombatState에 바론 체력 받기
-        CombatState state = new CombatState(baron.health());
+        Dummy dummy = new Dummy(0);
+        CombatState state = new CombatState(baron.health(), new DummyTankingStrategy(dummy));
 
         // Q 데이터 읽어오기
         HeimerData.TurretData turret = heimerData.turret();

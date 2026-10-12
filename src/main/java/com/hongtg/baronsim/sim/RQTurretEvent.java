@@ -1,6 +1,5 @@
 package com.hongtg.baronsim.sim;
 
-import com.hongtg.baronsim.data.HeimerData.RqTurretAttack;
 import com.hongtg.baronsim.data.HeimerData.RqTurretData;
 
 public record RQTurretEvent(

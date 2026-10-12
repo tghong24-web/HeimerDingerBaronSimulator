@@ -2,6 +2,7 @@ package com.hongtg.baronsim.sim;
 
 import java.util.Map;
 import java.util.EnumMap;
+import java.lang.annotation.Target;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
@@ -10,9 +11,11 @@ public class CombatState {
     private final PriorityQueue<Event> queue;
     private final Map<DamageSource, Double> damageBySource = new EnumMap<>(DamageSource.class);
     private double rReadyTime = 0;
+    private final TankingStrategy strategy;
 
-    public CombatState(double baronStartHealth){
+    public CombatState(double baronStartHealth, TankingStrategy strategy){
         this.baronHealth = baronStartHealth;
+        this.strategy = strategy;
         queue = new PriorityQueue<>(Comparator.comparingDouble(Event::time));
     }
 
@@ -45,6 +48,10 @@ public class CombatState {
 
     public boolean isBaronDead() {
         return baronHealth <= 0;
+    }
+
+    public TankingStrategy tankingStrategy() {
+        return strategy;
     }
 
     public boolean isRReady(double time) {
