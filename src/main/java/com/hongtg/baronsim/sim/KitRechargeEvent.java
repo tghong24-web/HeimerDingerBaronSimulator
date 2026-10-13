@@ -16,7 +16,7 @@ public record KitRechargeEvent(double time)
         // 3. 아니면(키트 3개 보다 적으면) time + 충전시간(rechargeSeconds) 후에
         //    KitRechargeEvent 하나 예약
         else {
-            KitRechargeEvent nextEvent = new KitRechargeEvent(time + state.turretKits().rechargeSeconds());
+            KitRechargeEvent nextEvent = new KitRechargeEvent(state.basicReadyTime(time, state.turretKits().rechargeSeconds()));
             state.schedule(nextEvent);
         }
     }

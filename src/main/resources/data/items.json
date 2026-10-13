@@ -1,6 +1,6 @@
 {
     "patch": "26.20",
-    "note": "아이템 기본 스탯만 담는다 (8-2단계). 고유 효과(화상, 치명타, 사용 효과)는 8-3단계에서 추가. 관통력·증폭은 비율(0.40 = 40%)로 적는다. legendary는 완성템(같은 것 2개 불가), uniqueGroup은 툴팁의 '고유: ○○' 이름(같은 그룹은 1개만). 영광 아이템은 maxStacks·apPerStack으로 중첩 주문력을 계산한다. 2026-10-13 상점 툴팁 기준. 어둠불꽃 횃불의 apAmp 0.04는 고유 효과 '어둠불꽃'(불길에 걸린 에픽 몬스터 하나당 주문력 4%)이다. 0초 첫 공격부터 불길이 걸리고 포탑 평타로도 계속 갱신되므로 항상 켜진 증폭으로 둔다. 라바돈과는 더한다(0.30 + 0.04). 그림자불꽃 lowHealthThreshold·lowHealthDamageBonus: 바론 체력이 최대 체력의 40% 이하면 모든 피해(포탑·화상 포함) +20%. Gaze 감소와는 더한다 (2026-10-13 실측)",
+    "note": "아이템 기본 스탯만 담는다 (8-2단계). 고유 효과(화상, 치명타, 사용 효과)는 8-3단계에서 추가. 관통력·증폭은 비율(0.40 = 40%)로 적는다. legendary는 완성템(같은 것 2개 불가), uniqueGroup은 툴팁의 '고유: ○○' 이름(같은 그룹은 1개만). 영광 아이템은 maxStacks·apPerStack으로 중첩 주문력을 계산한다. 2026-10-13 상점 툴팁 기준. 어둠불꽃 횃불의 apAmp 0.04는 고유 효과 '어둠불꽃'(불길에 걸린 에픽 몬스터 하나당 주문력 4%)이다. 0초 첫 공격부터 불길이 걸리고 포탑 평타로도 계속 갱신되므로 항상 켜진 증폭으로 둔다. 라바돈과는 더한다(0.30 + 0.04). 그림자불꽃 lowHealthThreshold·lowHealthDamageBonus: 바론 체력이 최대 체력의 40% 이하면 모든 피해(포탑·화상 포함) +20%. Gaze 감소와는 더한다 (2026-10-13 실측). 실체화 장비 active*: 사용 효과 '마나 실현'. 0초에 한 번 쓰고 8초 동안 모든 피해 +(15% + 추가 마나 × 0.005%), 기본 스킬(W·E·Q 사이·키트 충전) 재사용 대기시간이 1.3배 빠르게 흐른다",
     "burn": {
         "note": "화상(8-3단계): 스킬 피해마다 3초로 갱신, 0.5초마다 틱. burnPerTick은 바론(에픽 몬스터) 상대 마저 적용 전 틱당 피해(몬스터 추가 피해 포함), burnApRatioPerTick은 틱당 주문력 계수. 리안드리는 에픽 몬스터에게 최대 체력 % 대신 틱당 20 고정 (2026-10-13 실측)",
         "durationSeconds": 3,
@@ -9,7 +9,7 @@
     "items": [
         { "id": "zhonyas",          "name": "존야의 모래시계",       "cost": 3250, "legendary": true,  "boots": false, "ap": 105, "armor": 50, "uniqueGroup": "경직" },
         { "id": "blackfire",        "name": "어둠불꽃 횃불",         "cost": 2800, "legendary": true,  "boots": false, "ap": 80,  "mana": 600, "abilityHaste": 20, "apAmp": 0.04, "burnPerTick": 20, "burnApRatioPerTick": 0.01 },
-        { "id": "materialization",  "name": "실체화 장비",           "cost": 2800, "legendary": true,  "boots": false, "ap": 90,  "mana": 300, "abilityHaste": 10 },
+        { "id": "materialization",  "name": "실체화 장비",           "cost": 2800, "legendary": true,  "boots": false, "ap": 90,  "mana": 300, "abilityHaste": 10, "activeDurationSeconds": 8, "activeDamageAmp": 0.15, "activeDamageAmpPerMana": 0.00005, "activeCooldownRate": 1.3 },
         { "id": "liandrys",         "name": "리안드리의 고통",       "cost": 3000, "legendary": true,  "boots": false, "ap": 60,  "health": 300, "burnPerTick": 20 },
         { "id": "voidstaff",        "name": "공허의 지팡이",         "cost": 3000, "legendary": true,  "boots": false, "ap": 95,  "percentMagicPen": 0.40, "uniqueGroup": "역병" },
         { "id": "shadowflame",      "name": "그림자불꽃",            "cost": 3200, "legendary": true,  "boots": false, "ap": 110, "flatMagicPen": 15, "lowHealthThreshold": 0.40, "lowHealthDamageBonus": 0.20 },

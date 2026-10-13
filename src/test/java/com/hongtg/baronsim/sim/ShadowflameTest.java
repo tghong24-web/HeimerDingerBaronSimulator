@@ -24,7 +24,7 @@ class ShadowflameTest {
     private CombatState state(double baronHealth, LowHealthBonus bonus) {
         return new CombatState(baronHealth, new DummyTankingStrategy(new Dummy(0, 0)), heimer, 0.5,
                 new TurretKits(0, 3, 20), new ArrayList<>(), new TurretSpec(500, 30, 30, 0, 1.0, 1.0, 3),
-                new ArrayList<>(), bonus);
+                new ArrayList<>(), bonus, new ActiveEffect(0, 0, 1));
     }
 
     private double dealt(CombatState s, DamageSource source) {

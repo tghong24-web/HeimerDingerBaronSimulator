@@ -192,6 +192,17 @@ class ItemDataTest {
     }
 
     @Test
+    void materializationActive() {
+        ItemData.Item m = data.item("materialization");
+        assertTrue(m.hasActive());
+        assertEquals(8, m.activeDurationSeconds(), 1e-9);
+        assertEquals(0.15, m.activeDamageAmp(), 1e-9);
+        assertEquals(0.00005, m.activeDamageAmpPerMana(), 1e-12);   // 추가 마나 1당 0.005%
+        assertEquals(1.3, m.activeCooldownRate(), 1e-9);
+        assertFalse(data.item("rabadons").hasActive());
+    }
+
+    @Test
     void unknownIdIsRejected() {
         assertThrows(IllegalArgumentException.class, () -> data.item("ludens"));
     }

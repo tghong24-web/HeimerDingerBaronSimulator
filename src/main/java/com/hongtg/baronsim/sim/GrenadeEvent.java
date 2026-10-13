@@ -19,7 +19,7 @@ public record GrenadeEvent(double time, double damage, double coolDown, Ultimate
         }        
         
         // 2. 다음 공격 예약: 새 GrenadeEvent를 만들어 state.schedule(...)
-        GrenadeEvent nextAttack = new GrenadeEvent(time + coolDown, damage, coolDown, re);
+        GrenadeEvent nextAttack = new GrenadeEvent(state.basicReadyTime(time, coolDown), damage, coolDown, re);
         state.schedule(nextAttack);
 
     }

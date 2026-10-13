@@ -23,6 +23,9 @@ public record ItemData(String patch, BurnRule burn, List<Item> items) {
      * burnPerTick, burnApRatioPerTick: 화상 아이템(운명의 재, 어둠불꽃 횃불, 리안드리)의 바론 상대 틱당 피해와 주문력 계수.
      *   틱당 피해 = burnPerTick + burnApRatioPerTick × 주문력 (마저 적용 전). 화상이 없는 아이템은 0.
      * lowHealthThreshold, lowHealthDamageBonus: 그림자불꽃. 대상 체력 비율이 threshold 이하면 모든 피해 +bonus. 없는 아이템은 0.
+     * active*: 실체화 장비 사용 효과. 0초에 한 번 써서 activeDurationSeconds 동안
+     *   모든 피해 +(activeDamageAmp + activeDamageAmpPerMana × 추가 마나), 기본 스킬 재사용 대기시간이 activeCooldownRate배 빠르게 흐른다.
+     *   사용 효과가 없는 아이템은 0.
      */
     public record Item(
             String id,
@@ -45,7 +48,16 @@ public record ItemData(String patch, BurnRule burn, List<Item> items) {
             double burnPerTick,
             double burnApRatioPerTick,
             double lowHealthThreshold,
-            double lowHealthDamageBonus) {
+            double lowHealthDamageBonus,
+            double activeDurationSeconds,
+            double activeDamageAmp,
+            double activeDamageAmpPerMana,
+            double activeCooldownRate) {
+
+        /** 사용 효과(실체화 장비)가 있는가. */
+        public boolean hasActive() {
+            return activeDurationSeconds > 0;
+        }
 
         /** 화상 아이템인가. */
         public boolean hasBurn() {

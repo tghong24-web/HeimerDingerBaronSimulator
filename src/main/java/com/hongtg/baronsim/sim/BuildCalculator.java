@@ -7,7 +7,7 @@ import com.hongtg.baronsim.data.ItemData;
 
 public class BuildCalculator {
     public static FinalStats calculate(ItemData data, Build build, RoleQuest quest){
-        double ap = 0, health = 0, armor = 0, mr = 0, haste = 0, flatPen = 0;
+        double ap = 0, health = 0, armor = 0, mr = 0, haste = 0, flatPen = 0, mana = 0;
         double perRemain = 1.0;
         double amp = 0;
         int bootsCount = 0, nonBootsCount = 0;
@@ -44,6 +44,7 @@ public class BuildCalculator {
             mr      += item.magicResist();
             haste   += item.abilityHaste();
             flatPen += item.flatMagicPen();
+            mana    += item.mana();
             perRemain *= (1 - item.percentMagicPen());
             amp     += item.apAmp();
             if(item.maxStacks() > 0) {
@@ -77,6 +78,6 @@ public class BuildCalculator {
         perRemain *= (1 - build.bonusPerPen());
         ap = ap * (1 + amp);
     
-        return new FinalStats(ap, flatPen, 1 - perRemain, haste, health, armor, mr);
+        return new FinalStats(ap, flatPen, 1 - perRemain, haste, health, armor, mr, mana);
     }
 }

@@ -27,7 +27,7 @@ class BurnTest {
 
     private CombatState state(List<BurnSpec> burns) {
         return new CombatState(1_000_000, new DummyTankingStrategy(new Dummy(0, 0)), heimer, 0.5,
-                new TurretKits(0, 3, 20), new ArrayList<>(), new TurretSpec(500, 30, 30, 0, 1.0, 1.0, 3), burns, new LowHealthBonus(0, 0));
+                new TurretKits(0, 3, 20), new ArrayList<>(), new TurretSpec(500, 30, 30, 0, 1.0, 1.0, 3), burns, new LowHealthBonus(0, 0), new ActiveEffect(0, 0, 1));
     }
 
     private void runUntil(CombatState s, double timeLimit) {

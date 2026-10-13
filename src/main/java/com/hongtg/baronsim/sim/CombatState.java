@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
+import com.hongtg.baronsim.calc.CooldownCalculator;
 import com.hongtg.baronsim.model.Heimer;
 import com.hongtg.baronsim.model.Target;
 import com.hongtg.baronsim.model.Turret;
@@ -32,8 +33,10 @@ public class CombatState {
     private final Map<DamageSource, Double> burnUntil = new EnumMap<>(DamageSource.class);;
     private final Map<DamageSource, Boolean> burning = new EnumMap<>(DamageSource.class);;
     private final LowHealthBonus lowHealthBonus;
+    private double activeDamageAmp;
+    private final ActiveEffect activeEffect;
 
-    public CombatState(double baronStartHealth, TankingStrategy strategy, Heimer heimer, double gazeReduction, TurretKits turretKits, List<Turret> turrets, TurretSpec turretSpec, List<BurnSpec> burnDamage, LowHealthBonus lowHealthBonus){
+    public CombatState(double baronStartHealth, TankingStrategy strategy, Heimer heimer, double gazeReduction, TurretKits turretKits, List<Turret> turrets, TurretSpec turretSpec, List<BurnSpec> burnDamage, LowHealthBonus lowHealthBonus, ActiveEffect activeEffect){
         this.baronHealth = baronStartHealth;
         this.baronStartHealth = baronStartHealth;
         this.strategy = strategy;
@@ -44,6 +47,8 @@ public class CombatState {
         this.turretSpec = turretSpec;
         this.burnDamage = burnDamage;
         this.lowHealthBonus = lowHealthBonus;
+        this.activeEffect = activeEffect;
+        this.activeDamageAmp = activeEffect.damageAmp();
         queue = new PriorityQueue<>(Comparator.comparingDouble((Scheduled s) -> s.event().time()).thenComparingLong(Scheduled::seq));
     }
 
@@ -74,7 +79,7 @@ public class CombatState {
         double withoutGaze = 1.0;
         if (baronHealth <= baronStartHealth * lowHealthBonus.threhold()) 
             withoutGaze += lowHealthBonus.bonus();
-
+        withoutGaze += activeDamageAmp;
         double modifier = withoutGaze;
         if (gazed) modifier -= gazeReduction;
         
@@ -99,8 +104,15 @@ public class CombatState {
                 burning.put(spec.source(), true);        
                 schedule(new BurnTickEvent(time + 0.5, spec));
             }
-        }
-        
+        }    
+    }
+
+    public double basicReadyTime(double start, double cooldown){
+        return CooldownCalculator.readyTime(start, cooldown, activeEffect.durationSeconds(), activeEffect.cooldownRate());
+    }
+
+    public void endActive() {
+        activeDamageAmp = 0;
     }
 
     public double baronStartHealth(){
@@ -164,7 +176,7 @@ public class CombatState {
     }
 
     public void useQ(double time, double cooldown) {
-        qReadyTime = time + cooldown;
+        qReadyTime = basicReadyTime(time, cooldown);   // 실체화 장비: Q 사이 대기도 기본 스킬 대기로 가속
     }
 
     public boolean isRReady(double time) {

@@ -7,6 +7,7 @@ public record FinalStats(
         double abilityHaste,
         double health,
         double armor,
-        double magicResist) {
+        double magicResist,
+        double mana) {
 
 }

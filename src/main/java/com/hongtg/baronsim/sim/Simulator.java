@@ -78,12 +78,21 @@ public class Simulator {
         // 아이템 고유 효과 확인(도트딜, 그림자불꽃)
         LowHealthBonus lowHealthBonus = new LowHealthBonus(0, 0);
         List<BurnSpec> burns = new ArrayList<>();
+        double activeDamageAmp = 0;
+        double activeDuration = 0;
+        double activeCooldownRate = 1;
+
         for (String id: input.build().items()){
             ItemData.Item item = itemData.item(id);
 
             // 그림자불꽃인지
             if (item.lowHealthDamageBonus() > 0) {
                 lowHealthBonus = new LowHealthBonus(item.lowHealthThreshold(), item.lowHealthDamageBonus());
+            }
+            if (item.hasActive()) {
+                activeDamageAmp = item.activeDamageAmp() + item.activeDamageAmpPerMana() * stats.mana();
+                activeDuration = item.activeDurationSeconds();
+                activeCooldownRate = item.activeCooldownRate();
             }
             // 도트딜있는 템인지
             if (!item.hasBurn()) {
@@ -104,11 +113,14 @@ public class Simulator {
         }
 
         // 입력한 전략에 맞는 state 생성
-        CombatState state = new CombatState(baron.health(), strategy, heimer, baronData.gaze().damageReduction(), turretKits, turrets, turretSpec, burns, lowHealthBonus);
-        
+        CombatState state = new CombatState(baron.health(), strategy, heimer, baronData.gaze().damageReduction(), turretKits, turrets, turretSpec, burns, lowHealthBonus, new ActiveEffect(activeDamageAmp, activeDuration, activeCooldownRate));
+        if (activeDuration > 0) {
+            state.schedule(new ActiveEndEvent(activeDuration));
+        }
+
         if(!turretKits.isFull()) {
             turretKits.setRecharging(true);
-            state.schedule(new KitRechargeEvent(input.restKitChargeSecond()));
+            state.schedule(new KitRechargeEvent(state.basicReadyTime(0, input.restKitChargeSecond())));
         }
         
         if (turretKits.hasKit() && input.turretCount() != turret.maxTurrets()){

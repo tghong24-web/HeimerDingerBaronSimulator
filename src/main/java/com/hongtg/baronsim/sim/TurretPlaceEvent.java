@@ -47,10 +47,10 @@ public record TurretPlaceEvent(
 
         if (!state.turretKits().isRecharging()) {
             state.turretKits().setRecharging(true);
-            state.schedule(new KitRechargeEvent(time + state.turretKits().rechargeSeconds()));
+            state.schedule(new KitRechargeEvent(state.basicReadyTime(time, state.turretKits().rechargeSeconds())));
         }
 
-        state.schedule(new TurretPlaceEvent(time + spec.qCooldown(), spec));
+        state.schedule(new TurretPlaceEvent(state.qReadyTime(), spec));   // useQ가 계산한 Q 준비 시각
 
         state.schedule(new TurretAttackEvent(time, spec.shotDamage(), spec.shotInterval(), newTurret));
     }

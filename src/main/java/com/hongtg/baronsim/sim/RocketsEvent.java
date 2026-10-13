@@ -18,7 +18,7 @@ public record RocketsEvent(double time, double damage, double coolDown, Ultimate
         }        
         
         // 2. 다음 공격 예약: 새 RocketsEvent를 만들어 state.schedule(...)
-        RocketsEvent nextAttack = new RocketsEvent(time + coolDown, damage, coolDown, rw);
+        RocketsEvent nextAttack = new RocketsEvent(state.basicReadyTime(time, coolDown), damage, coolDown, rw);
         state.schedule(nextAttack);
 
     }
