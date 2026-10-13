@@ -1,9 +1,12 @@
 package com.hongtg.baronsim.sim;
 
 import com.hongtg.baronsim.data.HeimerData.RqTurretData;
+import com.hongtg.baronsim.model.Turret;
 
 public record RQPlaceEvent(
         double time,
+        double health,
+        double armor,
         double shotDamage,
         double beamDamage,
         RqTurretData rqData,
@@ -11,8 +14,12 @@ public record RQPlaceEvent(
 
     @Override
     public void apply(CombatState state) {
-        state.schedule(new RQTurretEvent(time, 0, shotDamage, beamDamage, rqData));
+        Turret rq = new Turret(health, armor);
+        state.setRQ(rq);
+
+        state.schedule(new RQTurretEvent(time, 0, shotDamage, beamDamage, rqData, rq));
         state.useR(time, cooldown);
-        state.schedule(new RQPlaceEvent(time + cooldown, shotDamage, beamDamage, rqData, cooldown));
+        state.schedule(new RQPlaceEvent(time + cooldown, health, armor, shotDamage, beamDamage, rqData, cooldown));
+        state.schedule(new RQExpireEvent(time + rqData.durationSeconds(), rq));
     }
 }

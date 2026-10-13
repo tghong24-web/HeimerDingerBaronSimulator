@@ -26,6 +26,7 @@ public class CombatState {
     private final List<Turret> turrets;
     private double qReadyTime = 0;
     private final TurretSpec turretSpec;
+    private Turret rQTurret = null;
 
     public CombatState(double baronStartHealth, TankingStrategy strategy, Heimer heimer, double gazeReduction, TurretKits turretKits, List<Turret> turrets, TurretSpec turretSpec){
         this.baronHealth = baronStartHealth;
@@ -54,6 +55,10 @@ public class CombatState {
         return !queue.isEmpty();
     }
 
+    public void setRQ(Turret turret) {
+        rQTurret = turret;
+    }
+
     public void damageBaron(DamageSource source, double amount, Target attacker) {
         // 남작의 시선(Baron Gaze)이 적용 중이라면 딜감소 gazeReduction(0.5)만큼
         boolean gazed = gazeTarget != null && (gazeTarget == attacker || gazeTarget instanceof Heimer);
@@ -80,6 +85,10 @@ public class CombatState {
     
     public TurretSpec turretSpec() {
         return turretSpec;
+    }
+
+    public Turret rQTurret() {
+        return rQTurret;
     }
     
     public Map<DamageSource, Double> damageBySource() {
