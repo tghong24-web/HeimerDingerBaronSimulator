@@ -2,6 +2,7 @@ package com.hongtg.baronsim.data;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -17,7 +18,7 @@ class ItemDataTest {
     @Test
     void loadsAllItems() {
         assertEquals("26.20", data.patch());
-        assertEquals(10, data.items().size());
+        assertEquals(21, data.items().size());
     }
 
     @Test
@@ -79,6 +80,16 @@ class ItemDataTest {
     }
 
     @Test
+    void basicBoots() {
+        // 기본 신발: 이동 속도만 있어서 계산 스탯은 전부 0, 칸만 차지한다
+        Item boots = data.item("boots");
+        assertTrue(boots.boots());
+        assertEquals(300, boots.cost());
+        assertEquals(0, boots.ap(), 1e-9);
+        assertEquals(0, boots.flatMagicPen(), 1e-9);
+    }
+
+    @Test
     void bootsFlag() {
         assertTrue(data.item("sorcs").boots());
         assertTrue(data.item("spellslinger").boots());
@@ -91,6 +102,63 @@ class ItemDataTest {
         assertEquals(0, sorcs.ap(), 1e-9);
         assertEquals(0, sorcs.apAmp(), 1e-9);
         assertEquals(0, sorcs.abilityHaste(), 1e-9);
+    }
+
+    @Test
+    void components() {
+        assertEquals(30, data.item("fatedashes").ap(), 1e-9);
+        assertEquals(900, data.item("fatedashes").cost());
+        assertEquals(45, data.item("alternator").ap(), 1e-9);
+        assertEquals(25, data.item("blightingjewel").ap(), 1e-9);
+        assertEquals(0.13, data.item("blightingjewel").percentMagicPen(), 1e-9);
+        assertEquals(40, data.item("lostchapter").ap(), 1e-9);
+        assertEquals(300, data.item("lostchapter").mana(), 1e-9);
+        assertEquals(10, data.item("lostchapter").abilityHaste(), 1e-9);
+        assertEquals(40, data.item("seekers").ap(), 1e-9);
+        assertEquals(25, data.item("seekers").armor(), 1e-9);
+        assertEquals(20, data.item("amptome").ap(), 1e-9);
+        assertEquals(400, data.item("amptome").cost());
+        assertEquals(45, data.item("blastingwand").ap(), 1e-9);
+        assertEquals(65, data.item("largerod").ap(), 1e-9);
+    }
+
+    @Test
+    void legendaryFlag() {
+        assertTrue(data.item("rabadons").legendary());
+        assertTrue(data.item("zhonyas").legendary());
+        assertFalse(data.item("largerod").legendary());
+        assertFalse(data.item("amptome").legendary());
+        assertFalse(data.item("sorcs").legendary());
+    }
+
+    @Test
+    void uniqueGroups() {
+        // 같은 "고유" 그룹은 하나만 들 수 있다
+        assertEquals("역병", data.item("voidstaff").uniqueGroup());
+        assertEquals("역병", data.item("blightingjewel").uniqueGroup());
+        assertEquals("영광", data.item("darkseal").uniqueGroup());
+        assertEquals("영광", data.item("mejais").uniqueGroup());
+        assertEquals("경직", data.item("seekers").uniqueGroup());
+        assertEquals("경직", data.item("zhonyas").uniqueGroup());
+        assertEquals("무효화", data.item("banshees").uniqueGroup());
+        assertNull(data.item("rabadons").uniqueGroup());
+    }
+
+    @Test
+    void gloryStacks() {
+        Item seal = data.item("darkseal");
+        assertEquals(15, seal.ap(), 1e-9);
+        assertEquals(50, seal.health(), 1e-9);
+        assertEquals(10, seal.maxStacks());
+        assertEquals(4, seal.apPerStack(), 1e-9);
+
+        Item mejai = data.item("mejais");
+        assertEquals(20, mejai.ap(), 1e-9);
+        assertEquals(100, mejai.health(), 1e-9);
+        assertEquals(25, mejai.maxStacks());
+        assertEquals(5, mejai.apPerStack(), 1e-9);
+
+        assertEquals(0, data.item("rabadons").maxStacks());
     }
 
     @Test

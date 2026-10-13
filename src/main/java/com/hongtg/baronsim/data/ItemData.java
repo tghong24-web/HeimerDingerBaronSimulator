@@ -13,12 +13,19 @@ public record ItemData(String patch, List<Item> items) {
      * 아이템 하나의 기본 스탯.
      * percentMagicPen, apAmp는 비율이다 (0.40 = 40%).
      * apAmp는 라바돈처럼 "총 주문력이 N% 증가"하는 효과다.
+     * legendary: 완성템이면 true. 완성템은 같은 것을 2개 살 수 없고, 하위 아이템은 여러 개 살 수 있다.
+     * uniqueGroup: 툴팁의 "고유: ○○" 이름. 같은 그룹의 아이템은 1개만 들 수 있다. 없으면 null.
+     * maxStacks, apPerStack: 영광(암흑의 인장, 메자이) 중첩. 중첩 수는 입력으로 받는다. 중첩이 없는 아이템은 0.
      */
     public record Item(
             String id,
             String name,
             int cost,
+            boolean legendary,
             boolean boots,
+            String uniqueGroup,
+            int maxStacks,
+            double apPerStack,
             double ap,
             double health,
             double mana,
