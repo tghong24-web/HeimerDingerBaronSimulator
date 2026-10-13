@@ -185,6 +185,13 @@ class ItemDataTest {
     }
 
     @Test
+    void shadowflameLowHealthBonus() {
+        assertEquals(0.40, data.item("shadowflame").lowHealthThreshold(), 1e-9);
+        assertEquals(0.20, data.item("shadowflame").lowHealthDamageBonus(), 1e-9);
+        assertEquals(0, data.item("rabadons").lowHealthDamageBonus(), 1e-9);
+    }
+
+    @Test
     void unknownIdIsRejected() {
         assertThrows(IllegalArgumentException.class, () -> data.item("ludens"));
     }

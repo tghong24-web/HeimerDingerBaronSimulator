@@ -22,6 +22,7 @@ public record ItemData(String patch, BurnRule burn, List<Item> items) {
      * maxStacks, apPerStack: 영광(암흑의 인장, 메자이) 중첩. 중첩 수는 입력으로 받는다. 중첩이 없는 아이템은 0.
      * burnPerTick, burnApRatioPerTick: 화상 아이템(운명의 재, 어둠불꽃 횃불, 리안드리)의 바론 상대 틱당 피해와 주문력 계수.
      *   틱당 피해 = burnPerTick + burnApRatioPerTick × 주문력 (마저 적용 전). 화상이 없는 아이템은 0.
+     * lowHealthThreshold, lowHealthDamageBonus: 그림자불꽃. 대상 체력 비율이 threshold 이하면 모든 피해 +bonus. 없는 아이템은 0.
      */
     public record Item(
             String id,
@@ -42,7 +43,9 @@ public record ItemData(String patch, BurnRule burn, List<Item> items) {
             double percentMagicPen,
             double apAmp,
             double burnPerTick,
-            double burnApRatioPerTick) {
+            double burnApRatioPerTick,
+            double lowHealthThreshold,
+            double lowHealthDamageBonus) {
 
         /** 화상 아이템인가. */
         public boolean hasBurn() {

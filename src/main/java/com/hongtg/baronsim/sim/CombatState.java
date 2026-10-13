@@ -12,6 +12,7 @@ import com.hongtg.baronsim.model.Turret;
 
 public class CombatState {
     private double baronHealth;
+    private final double baronStartHealth;
     private final Map<DamageSource, Double> damageBySource = new EnumMap<>(DamageSource.class);
     private final Map<DamageSource, Double> gazeLossBySource = new EnumMap<>(DamageSource.class);
     private double rReadyTime = 0;
@@ -30,9 +31,11 @@ public class CombatState {
     private final List<BurnSpec> burnDamage;
     private final Map<DamageSource, Double> burnUntil = new EnumMap<>(DamageSource.class);;
     private final Map<DamageSource, Boolean> burning = new EnumMap<>(DamageSource.class);;
+    private final LowHealthBonus lowHealthBonus;
 
-    public CombatState(double baronStartHealth, TankingStrategy strategy, Heimer heimer, double gazeReduction, TurretKits turretKits, List<Turret> turrets, TurretSpec turretSpec, List<BurnSpec> burnDamage){
+    public CombatState(double baronStartHealth, TankingStrategy strategy, Heimer heimer, double gazeReduction, TurretKits turretKits, List<Turret> turrets, TurretSpec turretSpec, List<BurnSpec> burnDamage, LowHealthBonus lowHealthBonus){
         this.baronHealth = baronStartHealth;
+        this.baronStartHealth = baronStartHealth;
         this.strategy = strategy;
         this.heimer = heimer;
         this.gazeReduction = gazeReduction;
@@ -40,6 +43,7 @@ public class CombatState {
         this.turrets = turrets;
         this.turretSpec = turretSpec;
         this.burnDamage = burnDamage;
+        this.lowHealthBonus = lowHealthBonus;
         queue = new PriorityQueue<>(Comparator.comparingDouble((Scheduled s) -> s.event().time()).thenComparingLong(Scheduled::seq));
     }
 
@@ -66,11 +70,19 @@ public class CombatState {
     public void damageBaron(DamageSource source, double amount, Target attacker) {
         // 남작의 시선(Baron Gaze)이 적용 중이라면 딜감소 gazeReduction(0.5)만큼
         boolean gazed = gazeTarget != null && (gazeTarget == attacker || gazeTarget instanceof Heimer);
-        double afterGazedAmount = gazed ? amount * (1 - gazeReduction) : amount;
-        double realWithOutGaze  = Math.min(baronHealth, amount);
+        
+        double withoutGaze = 1.0;
+        if (baronHealth <= baronStartHealth * lowHealthBonus.threhold()) 
+            withoutGaze += lowHealthBonus.bonus();
+
+        double modifier = withoutGaze;
+        if (gazed) modifier -= gazeReduction;
+        
+        double realWithOutGaze   = Math.min(baronHealth, amount * withoutGaze);
+        double finalAmount       = Math.min(baronHealth, amount * modifier);
         
         // 남은 바론 체력보다 더 많은 데미지가 들어갔을 때를 방지해주는 Math.min
-        double realDamage       = Math.min(baronHealth, afterGazedAmount);
+        double realDamage       = Math.min(baronHealth, finalAmount);
         double gazeLoss         = realWithOutGaze - realDamage;  
         baronHealth -= realDamage;
         damageBySource.merge(source, realDamage, Double::sum);
@@ -89,6 +101,10 @@ public class CombatState {
             }
         }
         
+    }
+
+    public double baronStartHealth(){
+        return baronStartHealth;
     }
 
     public void stopBurning(DamageSource source) {

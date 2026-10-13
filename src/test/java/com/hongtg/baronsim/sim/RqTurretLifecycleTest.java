@@ -30,7 +30,7 @@ class RqTurretLifecycleTest {
 
     private CombatState newState() {
         return new CombatState(1_000_000, new DummyTankingStrategy(new Dummy(0, 0)), new Heimer(2000, 50, 0), 0.5,
-                new TurretKits(0, 3, 20), new ArrayList<>(), new TurretSpec(500, 30, 0, 0, 1.0, 1.0, 3), new ArrayList<>());
+                new TurretKits(0, 3, 20), new ArrayList<>(), new TurretSpec(500, 30, 0, 0, 1.0, 1.0, 3), new ArrayList<>(), new LowHealthBonus(0, 0));
     }
 
     /** timeLimit초까지 돌린다. 넘어간 이벤트는 다시 넣어 두어 이어서 돌릴 수 있게 한다. */

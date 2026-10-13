@@ -25,7 +25,7 @@ class TurretKitsTest {
     private TurretKits runRecharge(int startKits, double restSeconds, double timeLimit) {
         TurretKits kits = new TurretKits(startKits, 3, 20);
         CombatState state = new CombatState(1_000_000, new DummyTankingStrategy(new Dummy(0, 0)),
-                new Heimer(2000, 50, 0), 0.5, kits, new ArrayList<>(List.of(new Turret(500, 30, 0), new Turret(500, 30, 0), new Turret(500, 30, 0))), new TurretSpec(500, 30, 0, 0, 1.0, 1.0, 3), new ArrayList<>());
+                new Heimer(2000, 50, 0), 0.5, kits, new ArrayList<>(List.of(new Turret(500, 30, 0), new Turret(500, 30, 0), new Turret(500, 30, 0))), new TurretSpec(500, 30, 0, 0, 1.0, 1.0, 3), new ArrayList<>(), new LowHealthBonus(0, 0));
         if (!kits.isFull()) {
             kits.setRecharging(true);
             state.schedule(new KitRechargeEvent(restSeconds));

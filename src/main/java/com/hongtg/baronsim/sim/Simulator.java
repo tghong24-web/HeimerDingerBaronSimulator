@@ -75,10 +75,17 @@ public class Simulator {
 
         TurretSpec turretSpec = new TurretSpec(turretHp, turretArmor, turretMr, finalQDamage, shotInterval, CooldownCalculator.reducedCooldown(turret.cooldownSeconds(), stats.abilityHaste()), turret.maxTurrets());
 
-        // 도트딜 계산
+        // 아이템 고유 효과 확인(도트딜, 그림자불꽃)
+        LowHealthBonus lowHealthBonus = new LowHealthBonus(0, 0);
         List<BurnSpec> burns = new ArrayList<>();
         for (String id: input.build().items()){
             ItemData.Item item = itemData.item(id);
+
+            // 그림자불꽃인지
+            if (item.lowHealthDamageBonus() > 0) {
+                lowHealthBonus = new LowHealthBonus(item.lowHealthThreshold(), item.lowHealthDamageBonus());
+            }
+            // 도트딜있는 템인지
             if (!item.hasBurn()) {
                 continue;
             }
@@ -97,7 +104,7 @@ public class Simulator {
         }
 
         // 입력한 전략에 맞는 state 생성
-        CombatState state = new CombatState(baron.health(), strategy, heimer, baronData.gaze().damageReduction(), turretKits, turrets, turretSpec, burns);
+        CombatState state = new CombatState(baron.health(), strategy, heimer, baronData.gaze().damageReduction(), turretKits, turrets, turretSpec, burns, lowHealthBonus);
         
         if(!turretKits.isFull()) {
             turretKits.setRecharging(true);
