@@ -40,6 +40,7 @@ class ItemDataTest {
         assertEquals(80, blackfire.ap(), 1e-9);
         assertEquals(600, blackfire.mana(), 1e-9);
         assertEquals(20, blackfire.abilityHaste(), 1e-9);
+        assertEquals(0.04, blackfire.apAmp(), 1e-9);   // 어둠불꽃: 바론이 불길에 걸리면 주문력 4%
 
         Item m = data.item("materialization");
         assertEquals(90, m.ap(), 1e-9);

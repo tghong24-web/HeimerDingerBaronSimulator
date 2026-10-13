@@ -66,6 +66,30 @@ class BuildCalculatorTest {
     }
 
     @Test
+    void blackfireAmpAddsToRabadon() {
+        // 증폭은 더한다: (130 + 80) × (1 + 0.30 + 0.04) = 281.4 (곱하면 283.92)
+        assertEquals(281.4, calc("rabadons", "blackfire").ap(), 1e-9);
+    }
+
+    @Test
+    void blackfireAmpMatchesInGameMeasurement() {
+        // 2026-10-13 실측: 라바돈 + 어둠불꽃 + 룬 파편 AP 18
+        //   불길 전 228 × 1.30 = 296.4 → 화면 296, 불길 후 228 × 1.34 = 305.52 → 화면 306 (곱이면 308)
+        FinalStats s = BuildCalculator.calculate(DATA,
+                new Build(List.of("rabadons", "blackfire"), 18, 0, 0, 0, 0), RoleQuest.NONE);
+        assertEquals(305.52, s.ap(), 1e-9);
+        assertEquals(306, Math.round(s.ap()));
+    }
+
+    @Test
+    void blackfireAloneAmplifiesFourPercent() {
+        // (80 + 추가 220) × 1.04 = 312
+        FinalStats s = BuildCalculator.calculate(DATA,
+                new Build(List.of("blackfire"), 220, 0, 0, 0, 0), RoleQuest.NONE);
+        assertEquals(312, s.ap(), 1e-9);
+    }
+
+    @Test
     void flatPenAddsUp() {
         // 그림자불꽃 15 + 마법사의 신발 12 = 27, % 관통은 공허 40%
         FinalStats s = calc("voidstaff", "shadowflame", "sorcs");
