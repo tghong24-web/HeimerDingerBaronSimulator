@@ -18,7 +18,7 @@ import com.hongtg.baronsim.model.Turret;
  * 포탑 설치 테스트 (6단계 ③).
  * 죽은 자리 → 그 자리에, 빈 자리 → 맨 뒤에, 꽉 찼으면 설치 안 함.
  * 키트가 없으면 설치 안 하고, 설치하면 키트를 쓰고 충전 중이 아니면 충전을 시작한다.
- * 진행 중인 충전은 리셋되지 않는다.
+ * 진행 중인 충전은 리셋되지 않는다. Q 쿨 동안은 못 깔고, 깔고 나면 Q가 돌아올 때 다음 설치를 시도한다.
  */
 class TurretPlaceEventTest {
 
@@ -122,12 +122,14 @@ class TurretPlaceEventTest {
 
     @Test
     void usedKitComesBackAfterRecharge() {
-        // 키트 3개(가득) → 0초에 설치 → 2개, 20초에 충전되어 3개
+        // 포탑 2개 + 키트 3개(가득) → 0초에 설치(키트 2) → 1초 설치 시도는 자리가 꽉 차서 무시 → 20초에 키트 3
         TurretKits kits = new TurretKits(3, 3, 20);
-        CombatState state = newState(kits, new ArrayList<>());
+        List<Turret> turrets = new ArrayList<>(List.of(new Turret(500, 30), new Turret(500, 30)));
+        CombatState state = newState(kits, turrets);
         state.schedule(new TurretPlaceEvent(0, SPEC));
 
         runUntil(state, 19.9);
+        assertEquals(3, turrets.size());
         assertEquals(2, kits.kits());
 
         runUntil(state, 20.0);
@@ -137,9 +139,10 @@ class TurretPlaceEventTest {
 
     @Test
     void placingDoesNotResetOngoingRecharge() {
-        // 키트 2개, 남은 충전 5초 → 1초에 설치(1개) → 5초에 2개, 25초에 3개 (21초로 밀리지 않음)
+        // 포탑 2개, 키트 2개, 남은 충전 5초 → 1초에 설치(키트 1) → 5초에 2개, 25초에 3개 (21초로 밀리지 않음)
         TurretKits kits = new TurretKits(2, 3, 20);
-        CombatState state = newState(kits, new ArrayList<>());
+        List<Turret> turrets = new ArrayList<>(List.of(new Turret(500, 30), new Turret(500, 30)));
+        CombatState state = newState(kits, turrets);
         kits.setRecharging(true);
         state.schedule(new KitRechargeEvent(5));
         state.schedule(new TurretPlaceEvent(1, SPEC));
@@ -159,13 +162,73 @@ class TurretPlaceEventTest {
 
     @Test
     void placedTurretStartsShooting() {
-        // 0초 설치 → 0, 1, 2, 3초에 사격 = 4발
-        TurretKits kits = new TurretKits(3, 3, 20);
+        // 키트 1개 → 0초 설치 → 0, 1, 2, 3초에 사격 = 4발
+        TurretKits kits = new TurretKits(1, 3, 20);
         CombatState state = newState(kits, new ArrayList<>());
         state.schedule(new TurretPlaceEvent(0, SPEC));
 
         runUntil(state, 3.5);
 
         assertEquals(4 * 50, state.damageBySource().get(DamageSource.TURRET_SHOT), 1e-9);
+    }
+
+    @Test
+    void placesOneTurretPerQCooldown() {
+        // 포탑 0개, 키트 3개 → 0초, 1초, 2초에 하나씩
+        TurretKits kits = new TurretKits(3, 3, 20);
+        List<Turret> turrets = new ArrayList<>();
+        CombatState state = newState(kits, turrets);
+        state.schedule(new TurretPlaceEvent(0, SPEC));
+
+        runUntil(state, 0.0);
+        assertEquals(1, turrets.size());
+
+        runUntil(state, 0.9);
+        assertEquals(1, turrets.size());
+
+        runUntil(state, 1.0);
+        assertEquals(2, turrets.size());
+
+        runUntil(state, 2.0);
+        assertEquals(3, turrets.size());
+        assertEquals(0, kits.kits());
+    }
+
+    @Test
+    void sameTimeEventsWaitForQ() {
+        // 같은 0초에 설치 이벤트 2개 → Q 쿨 때문에 0초엔 1개만, 1초에 2개째
+        TurretKits kits = new TurretKits(3, 3, 20);
+        List<Turret> turrets = new ArrayList<>();
+        CombatState state = newState(kits, turrets);
+        state.schedule(new TurretPlaceEvent(0, SPEC));
+        state.schedule(new TurretPlaceEvent(0, SPEC));
+
+        runUntil(state, 0.5);
+        assertEquals(1, turrets.size());
+        assertEquals(2, kits.kits());
+
+        runUntil(state, 1.0);
+        assertEquals(2, turrets.size());
+    }
+
+    @Test
+    void oneTurretTwoKitsFillsUp() {
+        // 포탑 1개 + 키트 2개 → 0초, 1초에 설치해 3개, 키트 0 → 충전은 0초에 시작했으니 20초에 키트 1
+        TurretKits kits = new TurretKits(2, 3, 20);
+        List<Turret> turrets = new ArrayList<>(List.of(new Turret(500, 30)));
+        CombatState state = newState(kits, turrets);
+        state.schedule(new TurretPlaceEvent(0, SPEC));
+
+        runUntil(state, 1.0);
+        assertEquals(3, turrets.size());
+        assertEquals(0, kits.kits());
+        assertTrue(kits.isRecharging());
+
+        runUntil(state, 19.9);
+        assertEquals(0, kits.kits());
+
+        runUntil(state, 20.0);
+        assertEquals(1, kits.kits());
+        assertEquals(3, turrets.size());
     }
 }

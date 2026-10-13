@@ -24,6 +24,7 @@ public class CombatState {
     private final PriorityQueue<Scheduled> queue;
     private final TurretKits turretKits;
     private final List<Turret> turrets;
+    private double qReadyTime = 0;
 
     public CombatState(double baronStartHealth, TankingStrategy strategy, Heimer heimer, double gazeReduction, TurretKits turretKits, List<Turret> turrets){
         this.baronHealth = baronStartHealth;
@@ -97,6 +98,18 @@ public class CombatState {
 
     public TankingStrategy tankingStrategy() {
         return strategy;
+    }
+
+    public double qReadyTime() {
+        return qReadyTime;
+    }
+
+    public boolean isQReady(double time) {
+        return time >= qReadyTime;
+    }
+
+    public void useQ(double time, double cooldown) {
+        qReadyTime = time + cooldown;
     }
 
     public boolean isRReady(double time) {

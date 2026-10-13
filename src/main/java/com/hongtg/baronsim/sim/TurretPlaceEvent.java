@@ -13,7 +13,13 @@ public record TurretPlaceEvent(
         if (state.heimer().isDead()) {
             return;
         }
+        // 남은 Kit 없으면 X
         if (!state.turretKits().hasKit()) {
+            return;
+        }
+        // Q 쿨이 안 돌았으면 X
+        if (!state.isQReady(time)) {
+            state.schedule(new TurretPlaceEvent(state.qReadyTime(), spec));
             return;
         }
 
@@ -37,10 +43,14 @@ public record TurretPlaceEvent(
         }
 
         state.turretKits().useKit();
+        state.useQ(time, spec.qCooldown());
+
         if (!state.turretKits().isRecharging()) {
             state.turretKits().setRecharging(true);
             state.schedule(new KitRechargeEvent(time + state.turretKits().rechargeSeconds()));
         }
+
+        state.schedule(new TurretPlaceEvent(time + spec.qCooldown(), spec));
 
         state.schedule(new TurretAttackEvent(time, spec.shotDamage(), spec.shotInterval(), newTurret));
     }
