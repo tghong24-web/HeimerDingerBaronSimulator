@@ -1,0 +1,207 @@
+/*
+ * 바론 시뮬레이터 화면 스타일 (9-1단계). 시안 A안의 색을 그대로 옮겼다.
+ * JavaFX CSS는 웹 CSS와 비슷하지만 속성 이름 앞에 -fx- 가 붙는다 (Qt의 QSS와 비슷한 역할).
+ *
+ * 색: 배경 #010A13, 패널 #0A1428, 테두리 #1E2328 / #463714, 금색 #C8AA6E,
+ *     밝은 글자 #F0E6D2, 보조 글자 #A09B8C, 청록 #0AC8B9
+ *     스탯 강조: 주문력 #9D8CFF, 마법 관통 #F2994A, 스킬 가속 #3FD0C9
+ */
+
+.root {
+    -fx-font-family: "Malgun Gothic";
+    -fx-font-size: 13px;
+    -fx-base: #1E2328;
+    -fx-background: #010A13;
+    -fx-background-color: #010A13;
+    -fx-control-inner-background: #010A13;
+    -fx-accent: #C8AA6E;
+    -fx-focus-color: #C8AA6E;
+    -fx-faint-focus-color: transparent;
+    -fx-text-base-color: #F0E6D2;
+}
+
+.label { -fx-text-fill: #A09B8C; }
+
+/* ── 머리 줄 ── */
+.header {
+    -fx-background-color: #0A1428;
+    -fx-border-color: transparent transparent #463714 transparent;
+    -fx-padding: 12 24 12 24;
+}
+.app-title { -fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #F0E6D2; }
+.chip { -fx-text-fill: #C8AA6E; -fx-border-color: #463714; -fx-padding: 2 8 2 8; -fx-font-size: 12px; }
+.run-button {
+    -fx-background-color: #1E2328;
+    -fx-background-radius: 0;
+    -fx-border-color: #C8AA6E;
+    -fx-border-width: 2;
+    -fx-text-fill: #F0E6D2;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 32 10 32;
+    -fx-cursor: hand;
+}
+.run-button:hover { -fx-background-color: #2A3038; }
+.run-button:pressed { -fx-background-color: #463714; }
+
+.body { -fx-padding: 16 24 24 24; }
+
+/* ── 카드 ── */
+.card {
+    -fx-background-color: #0A1428;
+    -fx-border-color: #1E2328;
+    -fx-padding: 14 16 14 16;
+}
+.card-gold { -fx-border-color: #C8AA6E; -fx-padding: 18 16 18 16; }
+.section-title { -fx-text-fill: #C8AA6E; -fx-font-weight: bold; -fx-font-size: 13px; }
+.hint { -fx-text-fill: #6E6B62; -fx-font-size: 11px; }
+.value { -fx-text-fill: #F0E6D2; -fx-font-weight: bold; }
+.value-plain { -fx-text-fill: #F0E6D2; }
+.count { -fx-text-fill: #F0E6D2; -fx-font-weight: bold; -fx-font-size: 16px; }
+.error { -fx-text-fill: #E84057; }
+.loss { -fx-text-fill: #E84057; -fx-font-weight: bold; -fx-font-size: 15px; }
+
+/* 스탯 색 강조 */
+.stat-ap { -fx-text-fill: #9D8CFF; -fx-font-weight: bold; -fx-font-size: 16px; }
+.stat-pen { -fx-text-fill: #F2994A; -fx-font-weight: bold; -fx-font-size: 16px; }
+.stat-haste { -fx-text-fill: #3FD0C9; -fx-font-weight: bold; -fx-font-size: 16px; }
+
+/* 결과 카드 */
+.status { -fx-font-size: 12px; -fx-font-weight: bold; }
+.status-ok { -fx-text-fill: #0AC8B9; }
+.status-bad { -fx-text-fill: #E84057; }
+.status-warn { -fx-text-fill: #C8AA6E; }
+.big-time { -fx-text-fill: #F0E6D2; -fx-font-size: 40px; -fx-font-weight: bold; }
+.finish-hint { -fx-text-fill: #0AC8B9; -fx-font-weight: bold; }
+
+/* 딜 비중 막대 */
+.share-bar {
+    -fx-border-color: #1E2328;
+    -fx-min-height: 22;
+    -fx-pref-height: 22;
+    -fx-max-height: 22;
+}
+
+/* ── 아이콘 자리 ── */
+.icon-box { -fx-background-color: #010A13; -fx-border-color: #785A28; }
+.icon-placeholder { -fx-text-fill: #785A28; -fx-font-weight: bold; }
+
+/* ── 입력칸 ── */
+.text-field {
+    -fx-background-color: #010A13;
+    -fx-background-radius: 0;
+    -fx-border-color: #463714;
+    -fx-text-fill: #F0E6D2;
+    -fx-highlight-fill: #463714;
+}
+.text-field:focused { -fx-border-color: #C8AA6E; }
+.spinner { -fx-background-color: transparent; -fx-background-radius: 0; }
+.spinner .text-field { -fx-border-color: #463714 transparent #463714 #463714; }
+.spinner .increment-arrow-button, .spinner .decrement-arrow-button {
+    -fx-background-color: #1E2328;
+    -fx-background-radius: 0;
+    -fx-border-color: #463714;
+    -fx-border-width: 0.5;
+}
+.spinner .increment-arrow-button:hover, .spinner .decrement-arrow-button:hover { -fx-background-color: #2A3038; }
+.spinner .increment-arrow, .spinner .decrement-arrow { -fx-background-color: #C8AA6E; }
+.spinner.compact .text-field { -fx-alignment: center; }
+
+.combo-box {
+    -fx-background-color: #010A13;
+    -fx-background-radius: 0;
+    -fx-border-color: #463714;
+}
+.combo-box .list-cell { -fx-text-fill: #F0E6D2; -fx-background-color: transparent; }
+.combo-box .arrow-button { -fx-background-color: transparent; }
+.combo-box .arrow { -fx-background-color: #C8AA6E; }
+.combo-box-popup .list-view { -fx-background-color: #0A1428; -fx-border-color: #463714; }
+.combo-box-popup .list-cell { -fx-background-color: #0A1428; -fx-text-fill: #F0E6D2; -fx-padding: 6 10 6 10; }
+.combo-box-popup .list-cell:hover, .combo-box-popup .list-cell:selected { -fx-background-color: #1E2328; }
+
+.check-box .label { -fx-text-fill: #F0E6D2; }
+.check-box .box { -fx-background-color: #010A13; -fx-background-radius: 0; -fx-border-color: #C8AA6E; }
+.check-box:selected .mark { -fx-background-color: #C8AA6E; }
+
+/* 여러 개 중 하나 고르기 (RQ/RW/RE, 앞/뒤, 배속, 보기 전환) */
+.segmented { -fx-border-color: #463714; }
+.seg {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-text-fill: #A09B8C;
+    -fx-padding: 8 10 8 10;
+    -fx-cursor: hand;
+}
+.seg:hover { -fx-background-color: #10192A; }
+.seg:selected { -fx-background-color: #1E2328; -fx-text-fill: #0AC8B9; -fx-font-weight: bold; }
+
+/* ── 아이템 칸 ── */
+.slot {
+    -fx-background-color: #010A13;
+    -fx-background-radius: 0;
+    -fx-border-color: #785A28;
+    -fx-text-fill: #785A28;
+    -fx-font-size: 10px;
+    -fx-padding: 1;
+    -fx-min-width: 56; -fx-pref-width: 56; -fx-max-width: 56;
+    -fx-min-height: 56; -fx-pref-height: 56; -fx-max-height: 56;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+    -fx-cursor: hand;
+}
+.slot:hover { -fx-border-color: #C8AA6E; }
+.slot-filled { -fx-background-color: #1E2328; -fx-border-color: #C8AA6E; -fx-text-fill: #F0E6D2; }
+.slot-boots { -fx-border-style: segments(4, 3); }
+.divider { -fx-background-color: #463714; -fx-min-width: 1; -fx-pref-width: 1; -fx-max-width: 1; -fx-min-height: 40; }
+
+.context-menu { -fx-background-color: #0A1428; -fx-border-color: #463714; -fx-background-radius: 0; }
+.context-menu .menu-item .label { -fx-text-fill: #F0E6D2; }
+.context-menu .menu-item:focused { -fx-background-color: #1E2328; }
+.context-menu .separator .line { -fx-border-color: #463714 transparent transparent transparent; }
+
+.tooltip { -fx-background-color: #0A1428; -fx-background-radius: 0; -fx-border-color: #463714; -fx-text-fill: #F0E6D2; -fx-font-size: 12px; }
+
+/* ── 스크롤 ── */
+.scroll-pane, .scroll-pane > .viewport { -fx-background-color: transparent; }
+.scroll-pane { -fx-padding: 0; -fx-background-insets: 0; }
+.scroll-bar { -fx-background-color: #010A13; }
+.scroll-bar .thumb { -fx-background-color: #463714; -fx-background-radius: 0; }
+.scroll-bar .increment-button, .scroll-bar .decrement-button { -fx-padding: 0; }
+.scroll-bar .increment-arrow, .scroll-bar .decrement-arrow { -fx-padding: 0; -fx-shape: ""; }
+
+/* ── 체력 그래프 ── */
+.chart { -fx-padding: 4 8 0 0; }
+.chart-plot-background { -fx-background-color: transparent; }
+.chart-vertical-grid-lines, .chart-horizontal-grid-lines { -fx-stroke: #1E2328; }
+.chart-alternative-row-fill, .chart-alternative-column-fill { -fx-fill: transparent; -fx-stroke: transparent; }
+.axis { -fx-tick-label-fill: #A09B8C; }
+.axis-label { -fx-text-fill: #A09B8C; }
+.axis:bottom { -fx-border-color: #463714 transparent transparent transparent; }
+.axis:left { -fx-border-color: transparent #463714 transparent transparent; }
+.chart-series-line.hp-line { -fx-stroke: #A86BE0; -fx-stroke-width: 2.5px; }
+.chart-series-line.baseline-line { -fx-stroke: #0AC8B9; -fx-stroke-width: 1.5px; -fx-stroke-dash-array: 8 6; }
+.chart-series-line.shadow-line { -fx-stroke: #B08A4A; -fx-stroke-width: 1px; -fx-stroke-dash-array: 2 4; }
+.legend-swatch { -fx-min-width: 14; -fx-max-width: 14; -fx-min-height: 3; -fx-max-height: 3; }
+.legend-hp { -fx-background-color: #A86BE0; }
+.legend-baseline { -fx-background-color: #0AC8B9; }
+.legend-shadow { -fx-background-color: #B08A4A; }
+
+/* ── 리플레이 ── */
+.baron-name { -fx-text-fill: #F0E6D2; -fx-font-weight: bold; }
+.hp-track { -fx-background-color: #1E2328; -fx-border-color: #463714; -fx-min-height: 16; -fx-max-height: 16; -fx-padding: 1; }
+.hp-fill { -fx-background-color: #A86BE0; -fx-min-height: 12; -fx-max-height: 12; }
+.replay-stage { -fx-background-color: #06121A; }
+.play-button {
+    -fx-background-color: #1E2328;
+    -fx-background-radius: 0;
+    -fx-border-color: #C8AA6E;
+    -fx-border-width: 2;
+    -fx-text-fill: #F0E6D2;
+    -fx-font-weight: bold;
+    -fx-min-width: 120;
+    -fx-padding: 8 12 8 12;
+    -fx-cursor: hand;
+}
+.play-button:hover { -fx-background-color: #2A3038; }
+.slider .track { -fx-background-color: #1E2328; -fx-background-radius: 0; }
+.slider .thumb { -fx-background-color: #C8AA6E; -fx-background-radius: 0; -fx-padding: 7 4 7 4; }

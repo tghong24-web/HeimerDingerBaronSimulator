@@ -42,6 +42,7 @@ public record TurretPlaceEvent(
             return;
         }
 
+        state.record(ReplayEvent.Kind.TURRET_PLACED, newTurret, null, 0, 1);
         state.turretKits().useKit();
         state.useQ(time, spec.qCooldown());
 

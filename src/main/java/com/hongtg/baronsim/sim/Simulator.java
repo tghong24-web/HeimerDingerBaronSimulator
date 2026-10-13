@@ -130,8 +130,12 @@ public class Simulator {
 
         // 이미 깔려있던 포탑들 공격 시작
         for (Turret t : turrets) {
+            state.record(ReplayEvent.Kind.TURRET_READY, t, null, 0, 1);   // 9-2: 리플레이에 처음부터 보이게
             state.schedule(new TurretAttackEvent(0, finalQDamage, shotInterval, t));
         }
+
+        // RW/RE 한 방 피해 (체력 그래프 막타 기준선). 막타 구간은 그림자불꽃 구간이라고 가정한다
+        double ultimateOneShot = 0;
 
         // W 배웠으면 첫번째 로켓과 나머지 4개의 로켓 데미지를 계산 후 0초에 첫 사용 예약
         if (input.wLevel() > 0) {
@@ -169,6 +173,7 @@ public class Simulator {
                         stats.perPen(), stats.flatPen());
 
                 rw = new UltimateSpec(finalRWDamage, rCooldown);
+                ultimateOneShot = finalRWDamage * (1 + lowHealthBonus.bonus());
             }
             state.schedule(new RocketsEvent(0, finalWDamage, rocketCool, rw));
         }
@@ -198,6 +203,7 @@ public class Simulator {
                         stats.perPen(), stats.flatPen());
 
                 re = new UltimateSpec(finalREDamage, rCooldown);
+                ultimateOneShot = finalREDamage * (1 + lowHealthBonus.bonus());
             }
 
             state.schedule(new GrenadeEvent(0, finalEDamage, grenadeCool, re));
@@ -258,6 +264,7 @@ public class Simulator {
             outcome = Outcome.TIME_LIMIT;
         }
 
-        return new SimulatorResult(outcome, killSecond, state.damageBySource(), state.gazeLossBySource());
+        return new SimulatorResult(outcome, killSecond, state.damageBySource(), state.gazeLossBySource(),
+                baron.health(), ultimateOneShot, state.timeline());
     }
 }

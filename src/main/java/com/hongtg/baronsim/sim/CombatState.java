@@ -1,5 +1,6 @@
 package com.hongtg.baronsim.sim;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.EnumMap;
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.Comparator;
 import java.util.PriorityQueue;
 
 import com.hongtg.baronsim.calc.CooldownCalculator;
+import com.hongtg.baronsim.model.Dummy;
 import com.hongtg.baronsim.model.Heimer;
 import com.hongtg.baronsim.model.Target;
 import com.hongtg.baronsim.model.Turret;
@@ -35,6 +37,8 @@ public class CombatState {
     private final LowHealthBonus lowHealthBonus;
     private double activeDamageAmp;
     private final ActiveEffect activeEffect;
+    private double now = 0;   // 지금 처리 중인 이벤트 시각 (nextEvent가 갱신)
+    private final List<ReplayEvent> timeline = new ArrayList<>();   // 9-2: 전투 기록
 
     public CombatState(double baronStartHealth, TankingStrategy strategy, Heimer heimer, double gazeReduction, TurretKits turretKits, List<Turret> turrets, TurretSpec turretSpec, List<BurnSpec> burnDamage, LowHealthBonus lowHealthBonus, ActiveEffect activeEffect){
         this.baronHealth = baronStartHealth;
@@ -61,7 +65,9 @@ public class CombatState {
     }
 
     public Event nextEvent() {
-        return queue.poll().event();
+        Event e = queue.poll().event();
+        now = e.time();
+        return e;
     }
 
     public boolean hasEvents() {
@@ -90,10 +96,51 @@ public class CombatState {
         double realDamage       = Math.min(baronHealth, finalAmount);
         double gazeLoss         = realWithOutGaze - realDamage;  
         baronHealth -= realDamage;
+        record(ReplayEvent.Kind.HIT, attacker, source, realDamage, baronHealth / baronStartHealth);
         damageBySource.merge(source, realDamage, Double::sum);
         if (gazeLoss > 0) {
             gazeLossBySource.merge(source, gazeLoss, Double::sum);
         }
+    }
+
+    // ── 9-2: 전투 기록 ──
+
+    /** 기록 한 줄 추가. 시각은 지금 처리 중인 이벤트 시각, 누가/몇 번 칸인지는 대상 객체로 판단한다. */
+    public void record(ReplayEvent.Kind kind, Target who, DamageSource source, double amount, double healthRatio) {
+        timeline.add(new ReplayEvent(now, kind, actorOf(who), slotOf(who), source, amount, healthRatio));
+    }
+
+    /** 바론 평타 기록: 맞은 뒤 체력 비율, 그리고 죽었으면 사망 기록까지. BaronAttackEvent가 부른다. */
+    public void recordBaronAttack(Target target, double damage) {
+        double ratio = 1.0;
+        if (target instanceof Turret t) {
+            ratio = t.health() / t.maxHealth();
+        } else if (target instanceof Heimer h) {
+            ratio = h.health() / h.maxHealth();
+        }
+        record(ReplayEvent.Kind.BARON_ATTACK, target, null, damage, ratio);
+
+        if (target instanceof Turret t && t.isDead()) {
+            ReplayEvent.Kind died = actorOf(t) == ReplayEvent.Actor.RQ ? ReplayEvent.Kind.RQ_GONE : ReplayEvent.Kind.TURRET_DIED;
+            record(died, t, null, 0, 0);
+        } else if (target instanceof Heimer h && h.isDead()) {
+            record(ReplayEvent.Kind.HEIMER_DIED, h, null, 0, 0);
+        }
+    }
+
+    private ReplayEvent.Actor actorOf(Target who) {
+        if (who instanceof Heimer) return ReplayEvent.Actor.HEIMER;
+        if (who instanceof Dummy) return ReplayEvent.Actor.DUMMY;
+        return slotOf(who) >= 0 ? ReplayEvent.Actor.TURRET : ReplayEvent.Actor.RQ;
+    }
+
+    /** turrets 리스트에서 몇 번째 칸인지. Turret은 equals를 안 바꿨으므로 indexOf는 같은 객체(주소)를 찾는다. 없으면 -1 */
+    private int slotOf(Target who) {
+        return (who instanceof Turret) ? turrets.indexOf(who) : -1;
+    }
+
+    public List<ReplayEvent> timeline() {
+        return List.copyOf(timeline);
     }
 
     public void refreshBurns(double time) {

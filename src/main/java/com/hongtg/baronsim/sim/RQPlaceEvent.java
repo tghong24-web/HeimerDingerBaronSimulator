@@ -17,6 +17,7 @@ public record RQPlaceEvent(
     public void apply(CombatState state) {
         Turret rq = new Turret(health, armor, magicResist);
         state.setRQ(rq);
+        state.record(ReplayEvent.Kind.RQ_PLACED, rq, null, 0, 1);
 
         state.schedule(new RQTurretEvent(time, 0, shotDamage, beamDamage, rqData, rq));
         state.useR(time, cooldown);

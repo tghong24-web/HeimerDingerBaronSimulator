@@ -17,6 +17,7 @@ public record BaronAttackEvent(
         Target target = state.tankingStrategy().currentTarget(state);        
         double finalDamage = DamageCalculator.reducedDamage(baronDamage, target.armor(), 0, 0);
         target.takeDamage(finalDamage);
+        state.recordBaronAttack(target, finalDamage);
         // 방금 공격으로 포탑이 죽었으면 재설치 이벤트 실행
         if(target instanceof Turret t && t.isDead()) {
             state.schedule(new TurretPlaceEvent(time, state.turretSpec()));
