@@ -11,6 +11,7 @@ import com.hongtg.baronsim.model.BaronStats;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.hongtg.baronsim.calc.CooldownCalculator;
 import com.hongtg.baronsim.calc.DamageCalculator;
 
 public class Simulator {
@@ -25,6 +26,11 @@ public class Simulator {
         double heimerHp = heimerData.stats().health().valueAt(input.heimerLevel());
         double heimerArmor = heimerData.stats().armor().valueAt(input.heimerLevel());
         Heimer heimer = new Heimer(heimerHp, heimerArmor);
+        
+        double rCooldown = 0;
+        if(input.rLevel() > 0){
+            rCooldown = CooldownCalculator.reducedCooldown(heimerData.upgrade().cooldownAtRank(input.rLevel()), input.abilityHaste());
+        }
 
         // Q 데이터 읽어오기
         HeimerData.TurretData turret = heimerData.turret();
@@ -41,7 +47,11 @@ public class Simulator {
         double turretArmor = heimerData.turret().armorAt(input.heimerLevel());
 
         // 현재 터렛키트의 상태 생성
-        TurretKits turretKits = new TurretKits((input.currentKitCount()), heimerData.turret().maxKits(), heimerData.turret().kitRechargeSeconds());
+        TurretKits turretKits = new TurretKits((input.currentKitCount()), heimerData.turret().maxKits(), CooldownCalculator.reducedCooldown(heimerData.turret().kitRechargeSeconds(), input.abilityHaste()));
+        
+        if(turretKits.rechargeSeconds() < input.restKitChargeSecond()){
+            throw new IllegalArgumentException("남은 포탑 충전 대기시간은 "+ turretKits.rechargeSeconds() + "이하여야합니다");
+        }
 
         // 설정한 터렛의 개수만큼 새로운 터렛들을 리스트에 추가
         List<Turret> turrets = new ArrayList<>();
@@ -58,7 +68,7 @@ public class Simulator {
             strategy = new NoDummyTankingStrategy(turrets, heimer, input.rqPosition());
         }
 
-        TurretSpec turretSpec = new TurretSpec(turretHp, turretArmor, finalQDamage, shotInterval, turret.cooldownSeconds(), turret.maxTurrets());
+        TurretSpec turretSpec = new TurretSpec(turretHp, turretArmor, finalQDamage, shotInterval, CooldownCalculator.reducedCooldown(turret.cooldownSeconds(), input.abilityHaste()), turret.maxTurrets());
 
         // 입력한 전략에 맞는 state 생성
         CombatState state = new CombatState(baron.health(), strategy, heimer, baronData.gaze().damageReduction(), turretKits, turrets, turretSpec);
@@ -86,7 +96,7 @@ public class Simulator {
             double rocketDamage = rocket.firstRocketDamageAtRank(input.wLevel())
                     + extraRockets * rocket.extraRocketDamageAtRank(input.wLevel());
             double rocketAP = rocket.firstRocketApRatio() + extraRockets * rocket.extraRocketApRatio();
-            double rocketCool = rocket.cooldownAtRank(input.wLevel());
+            double rocketCool = CooldownCalculator.reducedCooldown(rocket.cooldownAtRank(input.wLevel()), input.abilityHaste());
 
             double baseWDamage = rocketDamage + rocketAP * input.ap();
             double finalWDamage = DamageCalculator.reducedDamage(baseWDamage, baron.magicResist(), input.percentPen(),
@@ -113,7 +123,7 @@ public class Simulator {
                 double finalRWDamage = DamageCalculator.reducedDamage(baseRWDamage, baron.magicResist(),
                         input.percentPen(), input.flatPen());
 
-                rw = new UltimateSpec(finalRWDamage, heimerData.upgrade().cooldownAtRank(input.rLevel()));
+                rw = new UltimateSpec(finalRWDamage, rCooldown);
             }
             state.schedule(new RocketsEvent(0, finalWDamage, rocketCool, rw));
         }
@@ -124,7 +134,7 @@ public class Simulator {
 
             double grenadeDamage = grenade.damageAtRank(input.eLevel());
             double grenadeAP = grenade.apRatio();
-            double grenadeCool = grenade.cooldownSeconds();
+            double grenadeCool = CooldownCalculator.reducedCooldown(grenade.cooldownSeconds(), input.abilityHaste());
 
             double baseEDamage = grenadeDamage + grenadeAP * input.ap();
             double finalEDamage = DamageCalculator.reducedDamage(baseEDamage, baron.magicResist(), input.percentPen(),
@@ -142,7 +152,7 @@ public class Simulator {
                 double finalREDamage = DamageCalculator.reducedDamage(baseREDamage, baron.magicResist(),
                         input.percentPen(), input.flatPen());
 
-                re = new UltimateSpec(finalREDamage, heimerData.upgrade().cooldownAtRank(input.rLevel()));
+                re = new UltimateSpec(finalREDamage, rCooldown);
             }
 
             state.schedule(new GrenadeEvent(0, finalEDamage, grenadeCool, re));
@@ -170,7 +180,7 @@ public class Simulator {
 
                 // 쿨이 돌 때마다 RQ 설치예약
                 state.schedule(new RQPlaceEvent(0, rturretHp, rturretArmor, finalRqShotDamage, finalRqBeamDamage, rturret,
-                        heimerData.upgrade().cooldownAtRank(input.rLevel())));
+                        rCooldown));
             }
         }
 

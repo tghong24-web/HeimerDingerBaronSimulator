@@ -78,10 +78,10 @@ class TurretKitsTest {
     }
 
     @Test
-    void simulationWithKitsKeepsSameResultUntilPlacementExists() {
-        // ③(설치) 전에는 키트가 차도 결과가 그대로여야 한다 (병풍 있음, 포탑 3개: 50.86초)
+    void kitsDoNotChangeResultWhenSlotsAreFull() {
+        // 포탑이 이미 3개면 키트가 있어도 더 깔 자리가 없어 결과가 그대로다 (병풍 있음, 포탑 3개: 50.86초)
         SimulatorResult result = new Simulator().run(new SimulationInput(
-                15, 13, 5, 0, 0, 0, UltimateChoice.NONE, 300, 0, 0, 3, 1, 7, RqTurretPosition.FRONT, true, 300));
+                15, 13, 5, 0, 0, 0, 0, UltimateChoice.NONE, 300, 0, 0, 3, 1, 7, RqTurretPosition.FRONT, true, 300));
 
         assertEquals(50.86, result.killTime(), 0.01);
     }

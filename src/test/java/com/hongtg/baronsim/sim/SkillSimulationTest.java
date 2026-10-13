@@ -24,7 +24,7 @@ class SkillSimulationTest {
 
     /** 바론 레벨, Q 레벨, 주문력, 관통, 제한 시간은 고정하고 바뀌는 값만 받는다. */
     private SimulatorResult run(int wLevel, int eLevel, int turretCount) {
-        return simulator.run(new SimulationInput(15, 13, 5, wLevel, eLevel, 0, UltimateChoice.NONE, 300, 0, 0, turretCount, 0, 20, RqTurretPosition.FRONT, true, 300));
+        return simulator.run(new SimulationInput(15, 13, 5, wLevel, eLevel, 0, 0, UltimateChoice.NONE, 300, 0, 0, turretCount, 0, 20, RqTurretPosition.FRONT, true, 300));
     }
 
     @Test

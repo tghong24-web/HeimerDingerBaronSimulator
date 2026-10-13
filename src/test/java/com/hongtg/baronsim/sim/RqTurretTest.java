@@ -31,7 +31,7 @@ class RqTurretTest {
     private SimulatorResult run(int wLevel, int eLevel, UltimateChoice ultimate, int turretCount, double timeLimit) {
         int rLevel = (ultimate == UltimateChoice.NONE) ? 0 : 3;
         return simulator.run(new SimulationInput(
-                15, 13, 5, wLevel, eLevel, rLevel, ultimate, 300, 0, 0, turretCount, 0, 20, RqTurretPosition.FRONT, true, timeLimit));
+                15, 13, 5, wLevel, eLevel, rLevel, 0, ultimate, 300, 0, 0, turretCount, 0, 20, RqTurretPosition.FRONT, true, timeLimit));
     }
 
     private double total(SimulatorResult result, DamageSource source) {
@@ -104,6 +104,6 @@ class RqTurretTest {
     @Test
     void ultimateWithoutRLevelIsRejected() {
         assertThrows(IllegalArgumentException.class, () -> new SimulationInput(
-                15, 13, 5, 0, 0, 0, UltimateChoice.RQ, 300, 0, 0, 3, 0, 20, RqTurretPosition.FRONT, true, 300));
+                15, 13, 5, 0, 0, 0, 0, UltimateChoice.RQ, 300, 0, 0, 3, 0, 20, RqTurretPosition.FRONT, true, 300));
     }
 }
