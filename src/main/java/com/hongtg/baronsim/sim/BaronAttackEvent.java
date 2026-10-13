@@ -1,6 +1,7 @@
 package com.hongtg.baronsim.sim;
 
 import com.hongtg.baronsim.model.Target;
+import com.hongtg.baronsim.model.Turret;
 import com.hongtg.baronsim.calc.DamageCalculator;
 
 public record BaronAttackEvent(
@@ -16,6 +17,10 @@ public record BaronAttackEvent(
         Target target = state.tankingStrategy().currentTarget(state);        
         double finalDamage = DamageCalculator.reducedDamage(baronDamage, target.armor(), 0, 0);
         target.takeDamage(finalDamage);
+        // 방금 공격으로 포탑이 죽었으면 재설치 이벤트 실행
+        if(target instanceof Turret t && t.isDead()) {
+            state.schedule(new TurretPlaceEvent(time, state.turretSpec()));
+        }
         state.setGazeTarget(target);
 
         // baronAttackSpeed 후 다음 공격 예약

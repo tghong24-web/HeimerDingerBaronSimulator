@@ -29,7 +29,7 @@ class BaronGazeTest {
     private final Turret t2 = new Turret(500, 50);
 
     private CombatState state(double baronHealth) {
-        return new CombatState(baronHealth, new NoDummyTankingStrategy(List.of(t1, t2), heimer), heimer, 0.5, new TurretKits(3, 3, 20), new ArrayList<>());
+        return new CombatState(baronHealth, new NoDummyTankingStrategy(List.of(t1, t2), heimer), heimer, 0.5, new TurretKits(0, 3, 20), new ArrayList<>(), new TurretSpec(500, 30, 0, 1.0, 1.0, 3));
     }
 
     private double loss(CombatState s, DamageSource source) {
@@ -81,7 +81,7 @@ class BaronGazeTest {
 
     @Test
     void gazeOnDummyReducesNothing() {
-        CombatState s = new CombatState(10_000, new DummyTankingStrategy(new Dummy(0)), heimer, 0.5, new TurretKits(3, 3, 20), new ArrayList<>());
+        CombatState s = new CombatState(10_000, new DummyTankingStrategy(new Dummy(0)), heimer, 0.5, new TurretKits(0, 3, 20), new ArrayList<>(), new TurretSpec(500, 30, 0, 1.0, 1.0, 3));
         s.setGazeTarget(new Dummy(0));
         s.damageBaron(DamageSource.ROCKETS, 100, heimer);
 
@@ -115,13 +115,14 @@ class BaronGazeTest {
 
     @Test
     void turretShotsLostToGaze() {
-        // 포탑 3개, 병풍 없음, 하이머 18레벨: 60발 중 24발이 Gaze로 절반 → 손해 12발 분량
+        // 포탑 3개, 병풍 없음, 하이머 18레벨, 키트는 19초·39초에 참 (NoDummyTankingTest 참고)
+        //   처음 3개: 60발 중 24발 절반 → 손해 12발 / 포탑 A: 9발 중 8발 절반 → 4발 / 포탑 B: 11발 모두 절반 → 5.5발
         SimulatorResult result = new Simulator().run(new SimulationInput(
-                15, 18, 5, 0, 0, 0, UltimateChoice.NONE, 300, 0, 0, 3, 0, 20, RqTurretPosition.FRONT, false, 300));
+                15, 18, 5, 0, 0, 0, UltimateChoice.NONE, 300, 0, 0, 3, 0, 19, RqTurretPosition.FRONT, false, 300));
 
-        assertEquals(12 * Q, result.gazeLossBySource().get(DamageSource.TURRET_SHOT), 0.05);
-        // 들어간 딜 + 잃은 딜 = Gaze가 없었을 때의 딜(60발)
-        assertEquals(60 * Q, result.damageBySource().get(DamageSource.TURRET_SHOT)
+        assertEquals(21.5 * Q, result.gazeLossBySource().get(DamageSource.TURRET_SHOT), 0.05);
+        // 들어간 딜 + 잃은 딜 = Gaze가 없었을 때의 딜(60 + 9 + 11 = 80발)
+        assertEquals(80 * Q, result.damageBySource().get(DamageSource.TURRET_SHOT)
                 + result.gazeLossBySource().get(DamageSource.TURRET_SHOT), 0.05);
     }
 

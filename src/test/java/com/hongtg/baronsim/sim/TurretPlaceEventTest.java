@@ -26,7 +26,7 @@ class TurretPlaceEventTest {
 
     private CombatState newState(TurretKits kits, List<Turret> turrets, Heimer heimer) {
         return new CombatState(1_000_000, new DummyTankingStrategy(new Dummy(0)),
-                heimer, 0.5, kits, turrets);
+                heimer, 0.5, kits, turrets, SPEC);
     }
 
     private CombatState newState(TurretKits kits, List<Turret> turrets) {

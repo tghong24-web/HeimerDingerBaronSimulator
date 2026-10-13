@@ -19,10 +19,12 @@ public class SimulatorTest {
 
     @Test
     void oneTurretKillLevel15Baron() {
+        // 포탑 1개, 키트 0개(남은 충전 20초) → 20초, 40초에 키트가 차서 포탑 추가 → 포탑 0, 20, 40초 시작
+        // (추가 설치가 없으면 153.14초)
         SimulatorResult result = simulator.run(new SimulationInput(15, 13, 5, 0, 0, 0, UltimateChoice.NONE, 300, 0, 0, 1, 0, 20, RqTurretPosition.FRONT, true, 300));
 
         assertTrue(result.killed());
-        assertEquals(153.14, result.killTime(), 0.01);
+        assertEquals(70.86, result.killTime(), 0.01);
     }
 
     @Test
@@ -33,10 +35,12 @@ public class SimulatorTest {
     }
 
     @Test
-    void zeroTurretCannotKill() {
+    void zeroTurretsGetPlacedByKits() {
+        // 포탑 0개, 키트 0개 → 20, 40, 60초에 하나씩 설치해서 처치
         SimulatorResult result = simulator.run(new SimulationInput(15, 13, 5, 0, 0, 0, UltimateChoice.NONE, 300, 0, 0, 0, 0, 20, RqTurretPosition.FRONT, true, 300));
 
-        assertFalse(result.killed());
+        assertTrue(result.killed());
+        assertEquals(90.86, result.killTime(), 0.01);
     }
 
     @Test

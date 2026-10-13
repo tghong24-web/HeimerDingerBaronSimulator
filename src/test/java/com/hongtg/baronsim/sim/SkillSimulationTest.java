@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * - W 5레벨 한 번(5발 합): 312.87, 쿨타임 7초
  * - W 1레벨 한 번(5발 합): 215.61, 쿨타임 11초
  * - E 5레벨 한 번: 216.15, 쿨타임 11초
+ * 포탑이 3개 미만이면 20초마다 키트가 차서 추가로 깔린다 (포탑 1개 → 0, 20, 40초 / 0개 → 20, 40, 60초).
  */
 class SkillSimulationTest {
 
@@ -63,24 +64,25 @@ class SkillSimulationTest {
         SimulatorResult result = run(5, 5, 1);
 
         assertTrue(result.killed());
-        assertEquals(98.29, result.killTime(), 0.01);
+        assertEquals(59.43, result.killTime(), 0.01);
     }
 
-    /** 포탑 없이 W만으로는 300초 안에 못 잡는다 (294초 시점까지 체력이 남음). */
+    /** 포탑 0개에서 W와 키트로 깐 포탑(20, 40, 60초)으로 잡는다. */
     @Test
-    void rocketsAloneCannotKillInTime() {
+    void rocketsWithKitTurrets() {
         SimulatorResult result = run(5, 0, 0);
 
-        assertFalse(result.killed());
+        assertTrue(result.killed());
+        assertEquals(80.57, result.killTime(), 0.01);
     }
 
-    /** 포탑 없이 W와 E만으로는 286초에 잡는다. 이벤트 종류가 섞여도 큐가 시간순으로 처리되는지 확인. */
+    /** 포탑 0개에서 W, E, 키트로 깐 포탑으로 77초(W·E 차례가 겹치는 시각)에 잡는다. 이벤트 종류가 섞여도 큐가 시간순으로 처리되는지 확인. */
     @Test
-    void rocketsAndGrenadeWithoutTurrets() {
+    void rocketsAndGrenadeWithKitTurrets() {
         SimulatorResult result = run(5, 5, 0);
 
         assertTrue(result.killed());
-        assertEquals(286.0, result.killTime(), 0.01);
+        assertEquals(77.0, result.killTime(), 0.01);
     }
 
     @Test

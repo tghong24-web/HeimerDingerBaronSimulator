@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
  *   RE 한 번 R3 = (300 + 0.60*300) * 2회 적중 = 960 → 마저 적용 ≈ 518.75
  *   일반 E5 한 번 = (220 + 0.60*300) = 400 → ≈ 216.15
  *   RE는 E 차례에 일반 E 대신 나가고, R 쿨(R3 70초)이 돈 뒤 다음 E 차례(11초 간격)에 다시 나간다.
+ *   포탑이 3개 미만이면 20초마다 키트로 추가된다 (포탑 1개 → 0, 20, 40초 / 0개 → 20, 40, 60초).
  */
 class ReGrenadeTest {
 
@@ -58,23 +59,25 @@ class ReGrenadeTest {
     }
 
     @Test
-    void reIsReusedOnNextGrenadeTurnAfterCooldown() {
-        // 포탑 1개 (R 없이는 98.29초): R 쿨은 70초에 돌지만 E 차례는 77초 → RE 2번
+    void reWithOneTurret() {
+        // 포탑 1개(+20, 40초 설치): R 없이는 59.43초 → RE 1번으로 58.86초
         SimulatorResult result = run(5, 3, 1, 300);
 
         assertTrue(result.killed());
-        assertEquals(96.00, result.killTime(), 0.01);
-        assertEquals(2 * RE_R3, total(result, DamageSource.RE_GRENADE), 0.01);
+        assertEquals(58.86, result.killTime(), 0.01);
+        assertEquals(RE_R3, total(result, DamageSource.RE_GRENADE), 0.01);
     }
 
     @Test
-    void reFiresEveryUltimateCooldown() {
-        // 포탑 0개, 200초 제한: 0, 77, 154초에 RE 3번 / 나머지 E 차례 16번
+    void reIsReusedOnNextGrenadeTurnAfterCooldown() {
+        // 포탑 0개(20, 40, 60초 설치), W 없음: 84.57초에 처치
+        // R 쿨은 70초에 돌지만 E 차례는 77초 → RE는 0, 77초에 2번 / 나머지 E 차례(11~66초) 6번
         SimulatorResult result = run(0, 3, 0, 200);
 
-        assertFalse(result.killed());
-        assertEquals(3 * RE_R3, total(result, DamageSource.RE_GRENADE), 0.01);
-        assertEquals(16 * E5, total(result, DamageSource.GRENADE), 0.01);
+        assertTrue(result.killed());
+        assertEquals(84.57, result.killTime(), 0.01);
+        assertEquals(2 * RE_R3, total(result, DamageSource.RE_GRENADE), 0.01);
+        assertEquals(6 * E5, total(result, DamageSource.GRENADE), 0.01);
     }
 
     @Test

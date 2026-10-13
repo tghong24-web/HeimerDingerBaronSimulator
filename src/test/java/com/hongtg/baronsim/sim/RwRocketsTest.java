@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
  *   RW 한 번(20발 전탄) R3 = (225 + 0.45*300) + 4*(58 + 0.12*300) + 15*(29 + 0.06*300)
  *                        = 1441 → 마저 적용 ≈ 778.67
  *   RW는 W 차례에 일반 W 대신 나가고, R 쿨(R1~3: 100/85/70초)이 돌면 다음 W 차례에 다시 나간다.
+ *   포탑이 3개 미만이면 20초마다 키트로 추가된다 (포탑 1개 → 0, 20, 40초 / 0개 → 20, 40, 60초).
  */
 class RwRocketsTest {
 
@@ -49,22 +50,23 @@ class RwRocketsTest {
     }
 
     @Test
-    void rwIsReusedAfterUltimateCooldown() {
-        // 포탑 1개는 오래 걸려서 70초에 RW가 한 번 더 나간다 (R 없이는 98.29초)
+    void rwWithOneTurret() {
+        // 포탑 1개(+20, 40초 설치): R 없이는 59.43초 → RW 1번으로 58.29초
         SimulatorResult result = run(5, 3, 1, 300);
 
         assertTrue(result.killed());
-        assertEquals(93.14, result.killTime(), 0.01);
-        assertEquals(2 * RW_R3, rwTotal(result), 0.01, "0초, 70초에 RW 2번");
+        assertEquals(58.29, result.killTime(), 0.01);
+        assertEquals(RW_R3, rwTotal(result), 0.01, "70초 전에 끝나므로 RW는 1번");
     }
 
     @Test
-    void rwFiresEveryUltimateCooldown() {
-        // 포탑 0개, 200초 제한: 0, 70, 140초에 RW 3번
+    void rwIsReusedAfterUltimateCooldown() {
+        // 포탑 0개(20, 40, 60초 설치), E 없음: 77.71초에 처치, 그 전에 0초와 70초에 RW 2번
         SimulatorResult result = run(0, 3, 0, 200);
 
-        assertFalse(result.killed());
-        assertEquals(3 * RW_R3, rwTotal(result), 0.01);
+        assertTrue(result.killed());
+        assertEquals(77.71, result.killTime(), 0.01);
+        assertEquals(2 * RW_R3, rwTotal(result), 0.01, "0초, 70초에 RW 2번");
     }
 
     @Test

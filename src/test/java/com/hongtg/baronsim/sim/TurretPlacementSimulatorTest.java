@@ -30,8 +30,8 @@ class TurretPlacementSimulatorTest {
 
     @Test
     void oneTurretOneKitPlacesAtZero() {
-        // 포탑 1개 + 키트 1개 → 0초에 1개 설치 → 0, 0초 시작
-        assertEquals(76.571428571, run(1, 1).killTime(), 1e-6);
+        // 포탑 1개 + 키트 1개 → 0초에 1개 설치, 20초에 키트가 차서 1개 더 → 0, 0, 20초 시작
+        assertEquals(57.714285714, run(1, 1).killTime(), 1e-6);
     }
 
     @Test

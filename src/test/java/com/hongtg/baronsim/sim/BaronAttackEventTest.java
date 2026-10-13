@@ -24,7 +24,7 @@ class BaronAttackEventTest {
     private Dummy runAttacks(double dummyArmor, double timeLimit) {
         Dummy dummy = new Dummy(dummyArmor);
         // 바론 체력은 충분히 크게: 바론이 죽어서 멈추는 일이 없도록
-        CombatState state = new CombatState(1_000_000, new DummyTankingStrategy(dummy), new Heimer(2000, 50), 0.5, new TurretKits(3, 3, 20), new ArrayList<>());
+        CombatState state = new CombatState(1_000_000, new DummyTankingStrategy(dummy), new Heimer(2000, 50), 0.5, new TurretKits(3, 3, 20), new ArrayList<>(), new TurretSpec(500, 30, 0, 1.0, 1.0, 3));
         state.schedule(new BaronAttackEvent(0, BARON_AD, INTERVAL));
 
         while (state.hasEvents()) {

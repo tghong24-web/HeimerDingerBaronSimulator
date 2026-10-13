@@ -12,11 +12,12 @@ import org.junit.jupiter.api.Test;
 
 import com.hongtg.baronsim.model.Dummy;
 import com.hongtg.baronsim.model.Heimer;
+import com.hongtg.baronsim.model.Turret;
 
 /**
  * 포탑 키트 충전 테스트 (6단계 ②).
  * 키트는 최대 3개, 3개 미만이면 20초마다 하나씩 찬다. 시작 시 남은 충전 시간이 첫 충전 시각이 된다.
- * 아직 키트를 쓰는 곳(설치)이 없으므로 키트가 차는 것만 확인한다.
+ * 키트가 차는 것만 보려고 포탑 3개를 미리 깔아 둔다 (자리가 꽉 차 있으니 충전돼도 설치하지 않는다).
  */
 class TurretKitsTest {
 
@@ -24,7 +25,7 @@ class TurretKitsTest {
     private TurretKits runRecharge(int startKits, double restSeconds, double timeLimit) {
         TurretKits kits = new TurretKits(startKits, 3, 20);
         CombatState state = new CombatState(1_000_000, new DummyTankingStrategy(new Dummy(0)),
-                new Heimer(2000, 50), 0.5, kits, new ArrayList<>());
+                new Heimer(2000, 50), 0.5, kits, new ArrayList<>(List.of(new Turret(500, 30), new Turret(500, 30), new Turret(500, 30))), new TurretSpec(500, 30, 0, 1.0, 1.0, 3));
         if (!kits.isFull()) {
             kits.setRecharging(true);
             state.schedule(new KitRechargeEvent(restSeconds));

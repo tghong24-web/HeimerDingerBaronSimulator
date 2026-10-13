@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
  *   RQ 광선 1방 = (180 + 0.70*300) * 100/185.06 ≈ 210.74
  *   공격 간격 1/1.05초, 패턴: 평타 5 → 광선 1 → 평타 2 (총 8회)
  *   R 쿨(R3 70초)마다 다시 설치한다: 0, 70, 140, 210, 280초 ...
+ *   일반 포탑은 3개 미만이면 20초마다 키트로 추가된다 (RQ 터렛은 3개 제한·키트와 무관).
  */
 class RqTurretTest {
 
@@ -39,9 +40,11 @@ class RqTurretTest {
 
     @Test
     void rqTurretAloneCannotKillBaron() {
-        SimulatorResult result = run(0, 0, UltimateChoice.RQ, 0);
+        // 일반 포탑이 처음 깔리는 20초 전까지는 RQ 터렛만 때린다
+        SimulatorResult result = run(0, 0, UltimateChoice.RQ, 0, 19);
 
         assertFalse(result.killed());
+        assertEquals(0, total(result, DamageSource.TURRET_SHOT), 0.0001);
     }
 
     @Test
@@ -55,11 +58,13 @@ class RqTurretTest {
 
     @Test
     void rqTurretIsPlacedAgainEveryUltimateCooldown() {
-        // 포탑 0개, 300초 제한: 0, 70, 140, 210, 280초에 5번 설치
+        // 포탑 0개(키트로 20, 40, 60초 설치): 85.14초에 처치, 그 전에 RQ 터렛은 0, 70초에 2번 설치
         SimulatorResult result = run(0, 0, UltimateChoice.RQ, 0, 300);
 
-        assertEquals(5 * 7 * RQ_SHOT, total(result, DamageSource.RQ_TURRET_SHOT), 0.05);
-        assertEquals(5 * RQ_BEAM, total(result, DamageSource.RQ_TURRET_BEAM), 0.01);
+        assertTrue(result.killed());
+        assertEquals(85.14, result.killTime(), 0.01);
+        assertEquals(2 * 7 * RQ_SHOT, total(result, DamageSource.RQ_TURRET_SHOT), 0.05);
+        assertEquals(2 * RQ_BEAM, total(result, DamageSource.RQ_TURRET_BEAM), 0.01);
     }
 
     @Test
@@ -72,11 +77,12 @@ class RqTurretTest {
 
     @Test
     void rqTurretWithOneTurret() {
-        // 70초, 140초에 재설치 (재설치가 없으면 144.00초)
+        // 일반 포탑 0, 20, 40초 + RQ 0초 → 68.00초 (RQ 재설치 70초 전에 끝남)
         SimulatorResult result = run(0, 0, UltimateChoice.RQ, 1);
 
         assertTrue(result.killed());
-        assertEquals(135.43, result.killTime(), 0.01);
+        assertEquals(68.00, result.killTime(), 0.01);
+        assertEquals(7 * RQ_SHOT, total(result, DamageSource.RQ_TURRET_SHOT), 0.01);
     }
 
     @Test

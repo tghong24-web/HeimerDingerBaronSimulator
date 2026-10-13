@@ -7,6 +7,8 @@ public record KitRechargeEvent(double time)
     public void apply(CombatState state) {
         // 1.키트 하나 추가
         state.turretKits().addKit();
+        state.schedule(new TurretPlaceEvent(time, state.turretSpec()));
+        
         // 2.만약 가득 찼으면 충전 중 끄기(false)
         if(state.turretKits().isFull()) {
             state.turretKits().setRecharging(false);
