@@ -22,15 +22,15 @@ import com.hongtg.baronsim.model.Turret;
  */
 class TurretPlaceEventTest {
 
-    private static final TurretSpec SPEC = new TurretSpec(500, 30, 50, 1.0, 1.0, 3);
+    private static final TurretSpec SPEC = new TurretSpec(500, 30, 0, 50, 1.0, 1.0, 3);
 
     private CombatState newState(TurretKits kits, List<Turret> turrets, Heimer heimer) {
-        return new CombatState(1_000_000, new DummyTankingStrategy(new Dummy(0)),
+        return new CombatState(1_000_000, new DummyTankingStrategy(new Dummy(0, 0)),
                 heimer, 0.5, kits, turrets, SPEC);
     }
 
     private CombatState newState(TurretKits kits, List<Turret> turrets) {
-        return newState(kits, turrets, new Heimer(2000, 50));
+        return newState(kits, turrets, new Heimer(2000, 50, 0));
     }
 
     /** 예약된 이벤트를 timeLimit초까지 돌린다. 넘어간 이벤트는 다시 넣어 두어 이어서 돌릴 수 있게 한다. */
@@ -76,7 +76,7 @@ class TurretPlaceEventTest {
     void fullSlotsKeepKit() {
         TurretKits kits = new TurretKits(2, 3, 20);
         List<Turret> turrets = new ArrayList<>(List.of(
-                new Turret(500, 30), new Turret(500, 30), new Turret(500, 30)));
+                new Turret(500, 30, 0), new Turret(500, 30, 0), new Turret(500, 30, 0)));
         CombatState state = newState(kits, turrets);
 
         new TurretPlaceEvent(0, SPEC).apply(state);
@@ -90,9 +90,9 @@ class TurretPlaceEventTest {
     @Test
     void replacesDeadTurretInItsSlot() {
         TurretKits kits = new TurretKits(1, 3, 20);
-        Turret first = new Turret(500, 30);
-        Turret dead = new Turret(500, 30);
-        Turret third = new Turret(500, 30);
+        Turret first = new Turret(500, 30, 0);
+        Turret dead = new Turret(500, 30, 0);
+        Turret third = new Turret(500, 30, 0);
         dead.takeDamage(10_000);
         List<Turret> turrets = new ArrayList<>(List.of(first, dead, third));
         CombatState state = newState(kits, turrets);
@@ -110,7 +110,7 @@ class TurretPlaceEventTest {
     void deadHeimerDoesNotPlace() {
         TurretKits kits = new TurretKits(3, 3, 20);
         List<Turret> turrets = new ArrayList<>();
-        Heimer heimer = new Heimer(100, 0);
+        Heimer heimer = new Heimer(100, 0, 0);
         heimer.takeDamage(10_000);
         CombatState state = newState(kits, turrets, heimer);
 
@@ -124,7 +124,7 @@ class TurretPlaceEventTest {
     void usedKitComesBackAfterRecharge() {
         // 포탑 2개 + 키트 3개(가득) → 0초에 설치(키트 2) → 1초 설치 시도는 자리가 꽉 차서 무시 → 20초에 키트 3
         TurretKits kits = new TurretKits(3, 3, 20);
-        List<Turret> turrets = new ArrayList<>(List.of(new Turret(500, 30), new Turret(500, 30)));
+        List<Turret> turrets = new ArrayList<>(List.of(new Turret(500, 30, 0), new Turret(500, 30, 0)));
         CombatState state = newState(kits, turrets);
         state.schedule(new TurretPlaceEvent(0, SPEC));
 
@@ -141,7 +141,7 @@ class TurretPlaceEventTest {
     void placingDoesNotResetOngoingRecharge() {
         // 포탑 2개, 키트 2개, 남은 충전 5초 → 1초에 설치(키트 1) → 5초에 2개, 25초에 3개 (21초로 밀리지 않음)
         TurretKits kits = new TurretKits(2, 3, 20);
-        List<Turret> turrets = new ArrayList<>(List.of(new Turret(500, 30), new Turret(500, 30)));
+        List<Turret> turrets = new ArrayList<>(List.of(new Turret(500, 30, 0), new Turret(500, 30, 0)));
         CombatState state = newState(kits, turrets);
         kits.setRecharging(true);
         state.schedule(new KitRechargeEvent(5));
@@ -215,7 +215,7 @@ class TurretPlaceEventTest {
     void oneTurretTwoKitsFillsUp() {
         // 포탑 1개 + 키트 2개 → 0초, 1초에 설치해 3개, 키트 0 → 충전은 0초에 시작했으니 20초에 키트 1
         TurretKits kits = new TurretKits(2, 3, 20);
-        List<Turret> turrets = new ArrayList<>(List.of(new Turret(500, 30)));
+        List<Turret> turrets = new ArrayList<>(List.of(new Turret(500, 30, 0)));
         CombatState state = newState(kits, turrets);
         state.schedule(new TurretPlaceEvent(0, SPEC));
 

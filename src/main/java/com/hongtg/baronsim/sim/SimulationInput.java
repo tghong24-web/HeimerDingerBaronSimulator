@@ -2,27 +2,33 @@ package com.hongtg.baronsim.sim;
 
 // Simulation을 돌릴 때, 입력하기 편하게 정보들 record 형태로 만들어놓기
 public record SimulationInput(
-    int baronLevel, 
-    int heimerLevel,
-    int qLevel,
-    int wLevel,
-    int eLevel,
-    int rLevel,
-    double abilityHaste,
-    UltimateChoice ultimate,
-    double ap,
-    double percentPen,
-    double flatPen,
-    int turretCount,
-    int currentKitCount,
-    double restKitChargeSecond,
-    RqTurretPosition rqPosition,
-    boolean hasDummy,
-    double timeLimit) {
-    
+        int baronLevel,
+        int heimerLevel,
+        int qLevel,
+        int wLevel,
+        int eLevel,
+        int rLevel,
+        UltimateChoice ultimate,
+        Build build, // ap, abilityHaste, flatPen, PerPen이 담긴 Build
+        int turretCount,
+        int currentKitCount,
+        double restKitChargeSecond,
+        RqTurretPosition rqPosition,
+        boolean hasDummy,
+        double timeLimit,
+        RoleQuest quest) {
+
     public SimulationInput {
-        if (abilityHaste < 0) {
-            throw new IllegalArgumentException("스킬가속은 양수이어야합니다: "+ abilityHaste);
+        if (build == null) {
+            throw new IllegalArgumentException("build 정보가 필요합니다. ");
+
+        }
+        if (quest == null) {
+            throw new IllegalArgumentException("퀘스트를 선택해야합니다. ");
+
+        }
+        if (build.bonusAbilityHaste() < 0) {
+            throw new IllegalArgumentException("스킬가속은 양수이어야합니다: " + build.bonusAbilityHaste());
         }
         if (turretCount < 0 || turretCount > 3) {
             throw new IllegalArgumentException("포탑은 0~3개여야 합니다: " + turretCount);
@@ -37,13 +43,16 @@ public record SimulationInput(
             restKitChargeSecond = 0;
         }
         if (heimerLevel < 1 || heimerLevel > 20) {
-            throw new IllegalArgumentException("하이머딩거 레벨은 1~20이어야 합니다: " + heimerLevel);
+            throw new IllegalArgumentException("하이머딩거 레벨은 1~18이어야 합니다: " + heimerLevel);
+        }
+        if (heimerLevel > 18 && quest != RoleQuest.TOP) {
+            throw new IllegalArgumentException("퀘스트가 TOP이어야 20레벨 까지 가능합니다: " + heimerLevel);
         }
         if (timeLimit <= 0) {
             throw new IllegalArgumentException("제한 시간은 0보다 커야 합니다: " + timeLimit);
         }
-        if (ap < 0) {
-            throw new IllegalArgumentException("주문력은 양수이어야 합니다: " + ap);
+        if (build.bonusAp() < 0) {
+            throw new IllegalArgumentException("주문력은 양수이어야 합니다: " + build.bonusAp());
         }
         if (qLevel < 1 || qLevel > 5) {
             throw new IllegalArgumentException("Q레벨은 1이상 5이하 이어야 합니다: " + qLevel);

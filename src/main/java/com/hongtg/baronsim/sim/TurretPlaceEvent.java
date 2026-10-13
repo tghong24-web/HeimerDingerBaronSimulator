@@ -32,7 +32,7 @@ public record TurretPlaceEvent(
             }
         }
 
-        Turret newTurret = new Turret(spec.health(), spec.armor());
+        Turret newTurret = new Turret(spec.health(), spec.armor(), spec.magicResist());
 
         if (slot != -1) {
             state.turrets().set(slot, newTurret);

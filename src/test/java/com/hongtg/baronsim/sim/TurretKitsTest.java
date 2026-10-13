@@ -24,8 +24,8 @@ class TurretKitsTest {
     /** 키트 상태로 전투를 만들고, 키트 충전 이벤트만 timeLimit초까지 돌린다. Simulator와 같은 시작 처리. */
     private TurretKits runRecharge(int startKits, double restSeconds, double timeLimit) {
         TurretKits kits = new TurretKits(startKits, 3, 20);
-        CombatState state = new CombatState(1_000_000, new DummyTankingStrategy(new Dummy(0)),
-                new Heimer(2000, 50), 0.5, kits, new ArrayList<>(List.of(new Turret(500, 30), new Turret(500, 30), new Turret(500, 30))), new TurretSpec(500, 30, 0, 1.0, 1.0, 3));
+        CombatState state = new CombatState(1_000_000, new DummyTankingStrategy(new Dummy(0, 0)),
+                new Heimer(2000, 50, 0), 0.5, kits, new ArrayList<>(List.of(new Turret(500, 30, 0), new Turret(500, 30, 0), new Turret(500, 30, 0))), new TurretSpec(500, 30, 0, 0, 1.0, 1.0, 3));
         if (!kits.isFull()) {
             kits.setRecharging(true);
             state.schedule(new KitRechargeEvent(restSeconds));
@@ -81,7 +81,7 @@ class TurretKitsTest {
     void kitsDoNotChangeResultWhenSlotsAreFull() {
         // 포탑이 이미 3개면 키트가 있어도 더 깔 자리가 없어 결과가 그대로다 (병풍 있음, 포탑 3개: 50.86초)
         SimulatorResult result = new Simulator().run(new SimulationInput(
-                15, 13, 5, 0, 0, 0, 0, UltimateChoice.NONE, 300, 0, 0, 3, 1, 7, RqTurretPosition.FRONT, true, 300));
+                15, 13, 5, 0, 0, 0, UltimateChoice.NONE, new Build(List.of(), 300, 0, 0, 0, 0), 3, 1, 7, RqTurretPosition.FRONT, true, 300, RoleQuest.NONE));
 
         assertEquals(50.86, result.killTime(), 0.01);
     }

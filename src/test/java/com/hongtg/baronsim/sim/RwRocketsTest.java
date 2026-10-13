@@ -1,5 +1,6 @@
 package com.hongtg.baronsim.sim;
 
+import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -24,7 +25,7 @@ class RwRocketsTest {
 
     private SimulatorResult run(int eLevel, int rLevel, int turretCount, double timeLimit) {
         return simulator.run(new SimulationInput(
-                15, 13, 5, 5, eLevel, rLevel, 0, UltimateChoice.RW, 300, 0, 0, turretCount, 0, 20, RqTurretPosition.FRONT, true, timeLimit));
+                15, 13, 5, 5, eLevel, rLevel, UltimateChoice.RW, new Build(List.of(), 300, 0, 0, 0, 0), turretCount, 0, 20, RqTurretPosition.FRONT, true, timeLimit, RoleQuest.NONE));
     }
 
     private double rwTotal(SimulatorResult result) {
@@ -82,6 +83,6 @@ class RwRocketsTest {
     @Test
     void rwRequiresW() {
         assertThrows(IllegalArgumentException.class, () -> new SimulationInput(
-                15, 13, 5, 0, 0, 3, 0, UltimateChoice.RW, 300, 0, 0, 3, 0, 20, RqTurretPosition.FRONT, true, 300));
+                15, 13, 5, 0, 0, 3, UltimateChoice.RW, new Build(List.of(), 300, 0, 0, 0, 0), 3, 0, 20, RqTurretPosition.FRONT, true, 300, RoleQuest.NONE));
     }
 }

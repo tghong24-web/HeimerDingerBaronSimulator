@@ -1,5 +1,6 @@
 package com.hongtg.baronsim.sim;
 
+import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -22,8 +23,8 @@ class AbilityHasteTest {
 
     private SimulatorResult run(int wLevel, int eLevel, int rLevel, UltimateChoice ultimate, double haste,
             int turretCount, int kits, double restKitSeconds) {
-        return simulator.run(new SimulationInput(15, 13, 5, wLevel, eLevel, rLevel, haste, ultimate, 300, 0, 0,
-                turretCount, kits, restKitSeconds, RqTurretPosition.FRONT, true, 300));
+        return simulator.run(new SimulationInput(15, 13, 5, wLevel, eLevel, rLevel, ultimate, new Build(List.of(), 300, haste, 0, 0, 0),
+                turretCount, kits, restKitSeconds, RqTurretPosition.FRONT, true, 300, RoleQuest.NONE));
     }
 
     // ── 공식 ──

@@ -41,14 +41,14 @@ class NoDummyTankingTest {
     private static final double HIT_ON_TURRET = 244.6111;
     private static final double HIT_ON_HEIMER = 231.25;
 
-    private final Turret t1 = new Turret(TURRET_HP, TURRET_ARMOR);
-    private final Turret t2 = new Turret(TURRET_HP, TURRET_ARMOR);
-    private final Turret t3 = new Turret(TURRET_HP, TURRET_ARMOR);
-    private final Heimer heimer = new Heimer(HEIMER_HP, HEIMER_ARMOR);
+    private final Turret t1 = new Turret(TURRET_HP, TURRET_ARMOR, 0);
+    private final Turret t2 = new Turret(TURRET_HP, TURRET_ARMOR, 0);
+    private final Turret t3 = new Turret(TURRET_HP, TURRET_ARMOR, 0);
+    private final Heimer heimer = new Heimer(HEIMER_HP, HEIMER_ARMOR, 0);
 
     /** 바론 평타만 timeLimit초까지 돌린다 (하이머 스킬, 포탑 공격 없음). */
     private void runBaronAttacks(List<Turret> turrets, double timeLimit) {
-        CombatState state = new CombatState(1_000_000, new NoDummyTankingStrategy(turrets, heimer, RqTurretPosition.FRONT), heimer, 0.5, new TurretKits(0, 3, 20), turrets, new TurretSpec(500, 30, 0, 1.0, 1.0, 3));
+        CombatState state = new CombatState(1_000_000, new NoDummyTankingStrategy(turrets, heimer, RqTurretPosition.FRONT), heimer, 0.5, new TurretKits(0, 3, 20), turrets, new TurretSpec(500, 30, 0, 0, 1.0, 1.0, 3));
         state.schedule(new BaronAttackEvent(0, BARON_AD, INTERVAL));
         while (state.hasEvents()) {
             Event e = state.nextEvent();
@@ -125,7 +125,7 @@ class NoDummyTankingTest {
     @Test
     void deadTurretsStopShooting() {
         SimulatorResult result = new Simulator().run(new SimulationInput(
-                15, 18, 5, 0, 0, 0, 0, UltimateChoice.NONE, 300, 0, 0, 3, 0, 19, RqTurretPosition.FRONT, false, 60));
+                15, 18, 5, 0, 0, 0, UltimateChoice.NONE, new Build(List.of(), 300, 0, 0, 0, 0), 3, 0, 19, RqTurretPosition.FRONT, false, 60, RoleQuest.NONE));
 
         assertFalse(result.killed());
         assertEquals(Outcome.HEIMER_DEAD, result.outcome());
@@ -136,7 +136,7 @@ class NoDummyTankingTest {
     void sameInputWithDummyStillKills() {
         // 병풍이 있으면 포탑이 안 죽으니 기존처럼 50.86초에 처치
         SimulatorResult result = new Simulator().run(new SimulationInput(
-                15, 18, 5, 0, 0, 0, 0, UltimateChoice.NONE, 300, 0, 0, 3, 0, 20, RqTurretPosition.FRONT, true, 60));
+                15, 18, 5, 0, 0, 0, UltimateChoice.NONE, new Build(List.of(), 300, 0, 0, 0, 0), 3, 0, 20, RqTurretPosition.FRONT, true, 60, RoleQuest.NONE));
 
         assertTrue(result.killed());
         assertEquals(50.86, result.killTime(), 0.01);
@@ -146,7 +146,7 @@ class NoDummyTankingTest {
     void heimerDeathEndsSimulation() {
         // 포탑 3개가 17.6초까지 다 죽고, 19초·39초에 키트로 깐 포탑이 8방을 대신 맞아 하이머는 48.0초에 사망 → 거기서 끝
         SimulatorResult result = new Simulator().run(new SimulationInput(
-                15, 18, 5, 0, 0, 0, 0, UltimateChoice.NONE, 300, 0, 0, 3, 0, 19, RqTurretPosition.FRONT, false, 300));
+                15, 18, 5, 0, 0, 0, UltimateChoice.NONE, new Build(List.of(), 300, 0, 0, 0, 0), 3, 0, 19, RqTurretPosition.FRONT, false, 300, RoleQuest.NONE));
 
         assertEquals(Outcome.HEIMER_DEAD, result.outcome());
         assertEquals(48.0, result.killTime(), 0.001);
@@ -159,7 +159,7 @@ class NoDummyTankingTest {
         // Baron's Gaze가 하이머에게 걸리므로 0초(바론 첫 평타 전)를 빼고 전부 50%
         //   W = 312.87 + 156.44 + 156.44 = 2 × 312.87,  E = 216.15 + 108.07 = 1.5 × 216.15
         SimulatorResult result = new Simulator().run(new SimulationInput(
-                15, 18, 5, 5, 5, 0, 0, UltimateChoice.NONE, 300, 0, 0, 0, 0, 20, RqTurretPosition.FRONT, false, 300));
+                15, 18, 5, 5, 5, 0, UltimateChoice.NONE, new Build(List.of(), 300, 0, 0, 0, 0), 0, 0, 20, RqTurretPosition.FRONT, false, 300, RoleQuest.NONE));
 
         assertEquals(Outcome.HEIMER_DEAD, result.outcome());
         assertEquals(16.0, result.killTime(), 0.001);
@@ -170,9 +170,9 @@ class NoDummyTankingTest {
     @Test
     void outcomeWithDummy() {
         SimulatorResult killed = new Simulator().run(new SimulationInput(
-                15, 18, 5, 0, 0, 0, 0, UltimateChoice.NONE, 300, 0, 0, 3, 0, 20, RqTurretPosition.FRONT, true, 300));
+                15, 18, 5, 0, 0, 0, UltimateChoice.NONE, new Build(List.of(), 300, 0, 0, 0, 0), 3, 0, 20, RqTurretPosition.FRONT, true, 300, RoleQuest.NONE));
         SimulatorResult timeOut = new Simulator().run(new SimulationInput(
-                15, 18, 5, 0, 0, 0, 0, UltimateChoice.NONE, 300, 0, 0, 3, 0, 20, RqTurretPosition.FRONT, true, 30));
+                15, 18, 5, 0, 0, 0, UltimateChoice.NONE, new Build(List.of(), 300, 0, 0, 0, 0), 3, 0, 20, RqTurretPosition.FRONT, true, 30, RoleQuest.NONE));
 
         assertEquals(Outcome.KILLED, killed.outcome());
         assertEquals(Outcome.TIME_LIMIT, timeOut.outcome(), "병풍이 있으면 하이머는 죽지 않는다");

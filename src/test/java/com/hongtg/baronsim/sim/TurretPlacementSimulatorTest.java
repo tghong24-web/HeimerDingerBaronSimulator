@@ -1,5 +1,6 @@
 package com.hongtg.baronsim.sim;
 
+import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -16,8 +17,8 @@ class TurretPlacementSimulatorTest {
     private final Simulator simulator = new Simulator();
 
     private SimulatorResult run(int turretCount, int kits) {
-        return simulator.run(new SimulationInput(15, 13, 5, 0, 0, 0, 0, UltimateChoice.NONE, 300, 0, 0,
-                turretCount, kits, 20, RqTurretPosition.FRONT, true, 300));
+        return simulator.run(new SimulationInput(15, 13, 5, 0, 0, 0, UltimateChoice.NONE, new Build(List.of(), 300, 0, 0, 0, 0),
+                turretCount, kits, 20, RqTurretPosition.FRONT, true, 300, RoleQuest.NONE));
     }
 
     @Test

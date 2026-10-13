@@ -3,11 +3,13 @@ package com.hongtg.baronsim.model;
 public class Turret implements Target{
     private double health;
     private final double armor;
+    private final double magicResist;
     private final double maxHealth;
 
-    public Turret(double health, double armor) {
+    public Turret(double health, double armor, double mr) {
         this.health = health;
         this.armor = armor;
+        this.magicResist = mr;
         this.maxHealth = health;
     }
 
@@ -23,6 +25,10 @@ public class Turret implements Target{
     @Override 
     public double armor() {
         return armor;
+    }
+    @Override
+    public double magicResist() {
+        return magicResist;
     }
 
     public double maxHealth() {

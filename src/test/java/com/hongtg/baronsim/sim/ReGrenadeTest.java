@@ -1,5 +1,6 @@
 package com.hongtg.baronsim.sim;
 
+import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -24,7 +25,7 @@ class ReGrenadeTest {
 
     private SimulatorResult run(int wLevel, int rLevel, int turretCount, double timeLimit) {
         return simulator.run(new SimulationInput(
-                15, 13, 5, wLevel, 5, rLevel, 0, UltimateChoice.RE, 300, 0, 0, turretCount, 0, 20, RqTurretPosition.FRONT, true, timeLimit));
+                15, 13, 5, wLevel, 5, rLevel, UltimateChoice.RE, new Build(List.of(), 300, 0, 0, 0, 0), turretCount, 0, 20, RqTurretPosition.FRONT, true, timeLimit, RoleQuest.NONE));
     }
 
     private double total(SimulatorResult result, DamageSource source) {

@@ -21,14 +21,14 @@ import com.hongtg.baronsim.model.Turret;
  */
 class RqTurretTargetTest {
 
-    private final Turret t1 = new Turret(775, 80);
-    private final Turret t2 = new Turret(775, 80);
-    private final Turret rq = new Turret(1000, 50);
-    private final Heimer heimer = new Heimer(2343, 90.4);
+    private final Turret t1 = new Turret(775, 80, 0);
+    private final Turret t2 = new Turret(775, 80, 0);
+    private final Turret rq = new Turret(1000, 50, 0);
+    private final Heimer heimer = new Heimer(2343, 90.4, 0);
 
     private CombatState state(List<Turret> turrets, RqTurretPosition position) {
         return new CombatState(1_000_000, new NoDummyTankingStrategy(turrets, heimer, position), heimer, 0.5,
-                new TurretKits(0, 3, 20), turrets, new TurretSpec(775, 80, 0, 1.0, 1.0, 3));
+                new TurretKits(0, 3, 20), turrets, new TurretSpec(775, 80, 0, 0, 1.0, 1.0, 3));
     }
 
     private void kill(Turret t) {

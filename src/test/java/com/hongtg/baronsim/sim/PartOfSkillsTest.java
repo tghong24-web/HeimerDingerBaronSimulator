@@ -1,5 +1,6 @@
 package com.hongtg.baronsim.sim;
 
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -10,7 +11,7 @@ public class PartOfSkillsTest {
     private final Simulator simulator = new Simulator();
 
     private SimulatorResult run(int wLevel, int eLevel, int turretCount) {
-        return simulator.run(new SimulationInput(15, 13, 5, wLevel, eLevel, 0, 0, UltimateChoice.NONE, 300, 0, 0, turretCount, 0, 20, RqTurretPosition.FRONT, true, 300));
+        return simulator.run(new SimulationInput(15, 13, 5, wLevel, eLevel, 0, UltimateChoice.NONE, new Build(List.of(), 300, 0, 0, 0, 0), turretCount, 0, 20, RqTurretPosition.FRONT, true, 300, RoleQuest.NONE));
     }
 
     private double totalDamage(SimulatorResult result) {

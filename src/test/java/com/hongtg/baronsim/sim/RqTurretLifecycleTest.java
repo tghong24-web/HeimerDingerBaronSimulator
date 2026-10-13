@@ -29,8 +29,8 @@ class RqTurretLifecycleTest {
     private static final double BEAM = 200;
 
     private CombatState newState() {
-        return new CombatState(1_000_000, new DummyTankingStrategy(new Dummy(0)), new Heimer(2000, 50), 0.5,
-                new TurretKits(0, 3, 20), new ArrayList<>(), new TurretSpec(500, 30, 0, 1.0, 1.0, 3));
+        return new CombatState(1_000_000, new DummyTankingStrategy(new Dummy(0, 0)), new Heimer(2000, 50, 0), 0.5,
+                new TurretKits(0, 3, 20), new ArrayList<>(), new TurretSpec(500, 30, 0, 0, 1.0, 1.0, 3));
     }
 
     /** timeLimit초까지 돌린다. 넘어간 이벤트는 다시 넣어 두어 이어서 돌릴 수 있게 한다. */
@@ -53,7 +53,7 @@ class RqTurretLifecycleTest {
     @Test
     void placedRqTurretHasHealthAndArmor() {
         CombatState state = newState();
-        state.schedule(new RQPlaceEvent(0, 1000, 50, SHOT, BEAM, RQ, 70));
+        state.schedule(new RQPlaceEvent(0, 1000, 50, 0, SHOT, BEAM, RQ, 70));
 
         runUntil(state, 0);
 
@@ -65,7 +65,7 @@ class RqTurretLifecycleTest {
     @Test
     void rqTurretDisappearsAfterEightSeconds() {
         CombatState state = newState();
-        state.schedule(new RQPlaceEvent(0, 1000, 50, SHOT, BEAM, RQ, 70));
+        state.schedule(new RQPlaceEvent(0, 1000, 50, 0, SHOT, BEAM, RQ, 70));
 
         runUntil(state, 7.9);
         assertNotNull(state.rQTurret());
@@ -77,7 +77,7 @@ class RqTurretLifecycleTest {
     @Test
     void allEightAttacksLandBeforeExpiry() {
         CombatState state = newState();
-        state.schedule(new RQPlaceEvent(0, 1000, 50, SHOT, BEAM, RQ, 70));
+        state.schedule(new RQPlaceEvent(0, 1000, 50, 0, SHOT, BEAM, RQ, 70));
 
         runUntil(state, 10);
 
@@ -88,7 +88,7 @@ class RqTurretLifecycleTest {
     void deadRqTurretStopsAttacking() {
         // 0초 첫 평타 뒤에 죽으면 남은 7번은 안 나간다
         CombatState state = newState();
-        state.schedule(new RQPlaceEvent(0, 1000, 50, SHOT, BEAM, RQ, 70));
+        state.schedule(new RQPlaceEvent(0, 1000, 50, 0, SHOT, BEAM, RQ, 70));
         runUntil(state, 0);
 
         state.rQTurret().takeDamage(10_000);
@@ -101,7 +101,7 @@ class RqTurretLifecycleTest {
     void gazeOnRqTurretHalvesItsDamage() {
         // 0초 첫 평타는 정상, 그 뒤 바론이 RQ 터렛을 때렸다고 치면 남은 평타 6발 + 광선 1방이 절반
         CombatState state = newState();
-        state.schedule(new RQPlaceEvent(0, 1000, 50, SHOT, BEAM, RQ, 70));
+        state.schedule(new RQPlaceEvent(0, 1000, 50, 0, SHOT, BEAM, RQ, 70));
         runUntil(state, 0);
 
         state.setGazeTarget(state.rQTurret());
@@ -116,8 +116,8 @@ class RqTurretLifecycleTest {
     @Test
     void gazeOnOtherTurretDoesNotAffectRqTurret() {
         CombatState state = newState();
-        state.schedule(new RQPlaceEvent(0, 1000, 50, SHOT, BEAM, RQ, 70));
-        state.setGazeTarget(new Turret(500, 30));
+        state.schedule(new RQPlaceEvent(0, 1000, 50, 0, SHOT, BEAM, RQ, 70));
+        state.setGazeTarget(new Turret(500, 30, 0));
 
         runUntil(state, 10);
 
@@ -129,7 +129,7 @@ class RqTurretLifecycleTest {
         // R 쿨이 지속시간(8초)보다 짧다고 가정: 0초에 RQ1, 5초에 RQ2
         // 8초의 RQ1 만료 이벤트는 state의 RQ 터렛이 이미 RQ2라서 아무것도 지우지 않는다 (== 비교)
         CombatState state = newState();
-        state.schedule(new RQPlaceEvent(0, 1000, 50, SHOT, BEAM, RQ, 5));
+        state.schedule(new RQPlaceEvent(0, 1000, 50, 0, SHOT, BEAM, RQ, 5));
 
         runUntil(state, 0);
         Turret first = state.rQTurret();

@@ -4,14 +4,21 @@ public class Dummy implements Target {
     private int hitCount;
     private double totalDamage;
     private final double armor;
+    private final double magicResist;
 
-    public Dummy(double armor) {
+    public Dummy(double armor, double mr) {
         this.armor = armor;
+        this.magicResist = mr;
     }
 
     @Override 
     public double armor() {
         return armor;
+    }
+
+    @Override 
+    public double magicResist() {
+        return magicResist;
     }
 
     public int hitCount() {

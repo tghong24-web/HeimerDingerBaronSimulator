@@ -24,12 +24,12 @@ class BaronGazeTest {
     private static final double W = 312.8715;    // W5 한 번 (5발 합)
     private static final double E = 216.1461;    // E5 한 번
 
-    private final Heimer heimer = new Heimer(2000, 50);
-    private final Turret t1 = new Turret(500, 50);
-    private final Turret t2 = new Turret(500, 50);
+    private final Heimer heimer = new Heimer(2000, 50, 0);
+    private final Turret t1 = new Turret(500, 50, 0);
+    private final Turret t2 = new Turret(500, 50, 0);
 
     private CombatState state(double baronHealth) {
-        return new CombatState(baronHealth, new NoDummyTankingStrategy(List.of(t1, t2), heimer, RqTurretPosition.FRONT), heimer, 0.5, new TurretKits(0, 3, 20), new ArrayList<>(), new TurretSpec(500, 30, 0, 1.0, 1.0, 3));
+        return new CombatState(baronHealth, new NoDummyTankingStrategy(List.of(t1, t2), heimer, RqTurretPosition.FRONT), heimer, 0.5, new TurretKits(0, 3, 20), new ArrayList<>(), new TurretSpec(500, 30, 0, 0, 1.0, 1.0, 3));
     }
 
     private double loss(CombatState s, DamageSource source) {
@@ -81,8 +81,8 @@ class BaronGazeTest {
 
     @Test
     void gazeOnDummyReducesNothing() {
-        CombatState s = new CombatState(10_000, new DummyTankingStrategy(new Dummy(0)), heimer, 0.5, new TurretKits(0, 3, 20), new ArrayList<>(), new TurretSpec(500, 30, 0, 1.0, 1.0, 3));
-        s.setGazeTarget(new Dummy(0));
+        CombatState s = new CombatState(10_000, new DummyTankingStrategy(new Dummy(0, 0)), heimer, 0.5, new TurretKits(0, 3, 20), new ArrayList<>(), new TurretSpec(500, 30, 0, 0, 1.0, 1.0, 3));
+        s.setGazeTarget(new Dummy(0, 0));
         s.damageBaron(DamageSource.ROCKETS, 100, heimer);
 
         assertEquals(100, dealt(s, DamageSource.ROCKETS), 0.0001);
@@ -118,7 +118,7 @@ class BaronGazeTest {
         // 포탑 3개, 병풍 없음, 하이머 18레벨, 키트는 19초·39초에 참 (NoDummyTankingTest 참고)
         //   처음 3개: 60발 중 24발 절반 → 손해 12발 / 포탑 A: 9발 중 8발 절반 → 4발 / 포탑 B: 11발 모두 절반 → 5.5발
         SimulatorResult result = new Simulator().run(new SimulationInput(
-                15, 18, 5, 0, 0, 0, 0, UltimateChoice.NONE, 300, 0, 0, 3, 0, 19, RqTurretPosition.FRONT, false, 300));
+                15, 18, 5, 0, 0, 0, UltimateChoice.NONE, new Build(List.of(), 300, 0, 0, 0, 0), 3, 0, 19, RqTurretPosition.FRONT, false, 300, RoleQuest.NONE));
 
         assertEquals(21.5 * Q, result.gazeLossBySource().get(DamageSource.TURRET_SHOT), 0.05);
         // 들어간 딜 + 잃은 딜 = Gaze가 없었을 때의 딜(60 + 9 + 11 = 80발)
@@ -130,7 +130,7 @@ class BaronGazeTest {
     void skillsLostToGazeOnHeimer() {
         // 포탑 0개: W 3번 중 7·14초 2번이 절반 → 손해 W 1번 분량, E 2번 중 11초 1번이 절반 → 손해 E 0.5번 분량
         SimulatorResult result = new Simulator().run(new SimulationInput(
-                15, 18, 5, 5, 5, 0, 0, UltimateChoice.NONE, 300, 0, 0, 0, 0, 20, RqTurretPosition.FRONT, false, 300));
+                15, 18, 5, 5, 5, 0, UltimateChoice.NONE, new Build(List.of(), 300, 0, 0, 0, 0), 0, 0, 20, RqTurretPosition.FRONT, false, 300, RoleQuest.NONE));
 
         assertEquals(W, result.gazeLossBySource().get(DamageSource.ROCKETS), 0.01);
         assertEquals(0.5 * E, result.gazeLossBySource().get(DamageSource.GRENADE), 0.01);
@@ -139,7 +139,7 @@ class BaronGazeTest {
     @Test
     void noGazeLossWithDummy() {
         SimulatorResult result = new Simulator().run(new SimulationInput(
-                15, 18, 5, 5, 5, 0, 0, UltimateChoice.NONE, 300, 0, 0, 3, 0, 20, RqTurretPosition.FRONT, true, 300));
+                15, 18, 5, 5, 5, 0, UltimateChoice.NONE, new Build(List.of(), 300, 0, 0, 0, 0), 3, 0, 20, RqTurretPosition.FRONT, true, 300, RoleQuest.NONE));
 
         double totalLoss = result.gazeLossBySource().values().stream().mapToDouble(Double::doubleValue).sum();
         assertEquals(0, totalLoss, 0.0001);
