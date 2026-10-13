@@ -30,6 +30,13 @@ public final class DataLoader {
         return load("/data/heimerdinger.json", HeimerData.class);
     }
 
+    /** data/items.json을 읽는다. */
+    public static ItemData loadItems() {
+        ItemData data = load("/data/items.json", ItemData.class);
+        data.validate();
+        return data;
+    }
+
     /**
      * 클래스패스의 JSON 리소스를 읽어 type 객체로 만든다.
      * 디스크 경로가 아니라 리소스 경로라서 드라이브 글자와 상관없이 동작한다.
