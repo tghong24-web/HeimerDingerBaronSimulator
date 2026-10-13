@@ -55,7 +55,7 @@ public class Simulator {
         if (input.hasDummy()) {
             strategy = new DummyTankingStrategy(new Dummy(0));
         } else {
-            strategy = new NoDummyTankingStrategy(turrets, heimer);
+            strategy = new NoDummyTankingStrategy(turrets, heimer, input.rqPosition());
         }
 
         TurretSpec turretSpec = new TurretSpec(turretHp, turretArmor, finalQDamage, shotInterval, turret.cooldownSeconds(), turret.maxTurrets());

@@ -29,7 +29,7 @@ class BaronGazeTest {
     private final Turret t2 = new Turret(500, 50);
 
     private CombatState state(double baronHealth) {
-        return new CombatState(baronHealth, new NoDummyTankingStrategy(List.of(t1, t2), heimer), heimer, 0.5, new TurretKits(0, 3, 20), new ArrayList<>(), new TurretSpec(500, 30, 0, 1.0, 1.0, 3));
+        return new CombatState(baronHealth, new NoDummyTankingStrategy(List.of(t1, t2), heimer, RqTurretPosition.FRONT), heimer, 0.5, new TurretKits(0, 3, 20), new ArrayList<>(), new TurretSpec(500, 30, 0, 1.0, 1.0, 3));
     }
 
     private double loss(CombatState s, DamageSource source) {
