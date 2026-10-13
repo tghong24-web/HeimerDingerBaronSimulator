@@ -6,6 +6,7 @@ import com.hongtg.baronsim.model.Dummy;
 import com.hongtg.baronsim.model.Heimer;
 import com.hongtg.baronsim.model.Turret;
 import com.hongtg.baronsim.data.HeimerData;
+import com.hongtg.baronsim.data.ItemData;
 import com.hongtg.baronsim.model.BaronStats;
 
 import java.util.ArrayList;
@@ -16,7 +17,8 @@ import com.hongtg.baronsim.calc.DamageCalculator;
 
 public class Simulator {
     public SimulatorResult run(SimulationInput input) {
-        FinalStats stats = BuildCalculator.calculate(DataLoader.loadItems(), input.build(), input.quest());
+        ItemData itemData = DataLoader.loadItems();
+        FinalStats stats = BuildCalculator.calculate(itemData, input.build(), input.quest());
 
         BaronData baronData = DataLoader.loadBaron();
         HeimerData heimerData = DataLoader.loadHeimer();
@@ -73,8 +75,29 @@ public class Simulator {
 
         TurretSpec turretSpec = new TurretSpec(turretHp, turretArmor, turretMr, finalQDamage, shotInterval, CooldownCalculator.reducedCooldown(turret.cooldownSeconds(), stats.abilityHaste()), turret.maxTurrets());
 
+        // 도트딜 계산
+        List<BurnSpec> burns = new ArrayList<>();
+        for (String id: input.build().items()){
+            ItemData.Item item = itemData.item(id);
+            if (!item.hasBurn()) {
+                continue;
+            }
+
+            double baseBurn = item.burnPerTick() + item.burnApRatioPerTick() * stats.ap();
+            double finalBurn = DamageCalculator.reducedDamage(baseBurn, baron.magicResist(), stats.perPen(), stats.flatPen());
+        
+            DamageSource source = switch (id) {
+                case "fatedashes" -> DamageSource.FATED_ASHES_BURN;
+                case "blackfire" -> DamageSource.BLACKFIRE_BURN;
+                case "liandrys" -> DamageSource.LIANDRY_BURN;
+                default -> throw new IllegalStateException("화상 출처가 없는 아이템: " + id);
+            };
+
+            burns.add(new BurnSpec(source, finalBurn));
+        }
+
         // 입력한 전략에 맞는 state 생성
-        CombatState state = new CombatState(baron.health(), strategy, heimer, baronData.gaze().damageReduction(), turretKits, turrets, turretSpec);
+        CombatState state = new CombatState(baron.health(), strategy, heimer, baronData.gaze().damageReduction(), turretKits, turrets, turretSpec, burns);
         
         if(!turretKits.isFull()) {
             turretKits.setRecharging(true);

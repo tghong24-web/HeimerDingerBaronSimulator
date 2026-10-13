@@ -21,7 +21,8 @@ public record RQTurretEvent(
         switch (rqData.attackAt(attackIndex)) {
             case SHOT -> state.damageBaron(DamageSource.RQ_TURRET_SHOT, shotDamage, rqTurret);
             case BEAM -> state.damageBaron(DamageSource.RQ_TURRET_BEAM, beamDamage, rqTurret);
-        }
+        }   
+        state.refreshBurns(time);
 
         // 2. 다음 공격 예약: 공격 8회까지, 새 RQTurretEvent를 만들어 state.schedule(...)
         if (attackIndex + 1 < rqData.attackCount()) {

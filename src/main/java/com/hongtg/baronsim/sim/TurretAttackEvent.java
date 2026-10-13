@@ -18,7 +18,7 @@ public record TurretAttackEvent(
 
         // 1. 바론 체력 깎기
         state.damageBaron(DamageSource.TURRET_SHOT, damage, turret);
-
+        state.refreshBurns(time);
         // 2. 다음 공격 예약: 새 TurretAttackEvent를 만들어 state.schedule(...)
 
         TurretAttackEvent nextAttack = new TurretAttackEvent(time + interval, damage, interval, turret);

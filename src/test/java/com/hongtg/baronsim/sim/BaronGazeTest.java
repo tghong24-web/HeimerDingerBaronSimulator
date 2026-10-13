@@ -29,7 +29,7 @@ class BaronGazeTest {
     private final Turret t2 = new Turret(500, 50, 0);
 
     private CombatState state(double baronHealth) {
-        return new CombatState(baronHealth, new NoDummyTankingStrategy(List.of(t1, t2), heimer, RqTurretPosition.FRONT), heimer, 0.5, new TurretKits(0, 3, 20), new ArrayList<>(), new TurretSpec(500, 30, 0, 0, 1.0, 1.0, 3));
+        return new CombatState(baronHealth, new NoDummyTankingStrategy(List.of(t1, t2), heimer, RqTurretPosition.FRONT), heimer, 0.5, new TurretKits(0, 3, 20), new ArrayList<>(), new TurretSpec(500, 30, 0, 0, 1.0, 1.0, 3), new ArrayList<>());
     }
 
     private double loss(CombatState s, DamageSource source) {
@@ -81,7 +81,7 @@ class BaronGazeTest {
 
     @Test
     void gazeOnDummyReducesNothing() {
-        CombatState s = new CombatState(10_000, new DummyTankingStrategy(new Dummy(0, 0)), heimer, 0.5, new TurretKits(0, 3, 20), new ArrayList<>(), new TurretSpec(500, 30, 0, 0, 1.0, 1.0, 3));
+        CombatState s = new CombatState(10_000, new DummyTankingStrategy(new Dummy(0, 0)), heimer, 0.5, new TurretKits(0, 3, 20), new ArrayList<>(), new TurretSpec(500, 30, 0, 0, 1.0, 1.0, 3), new ArrayList<>());
         s.setGazeTarget(new Dummy(0, 0));
         s.damageBaron(DamageSource.ROCKETS, 100, heimer);
 

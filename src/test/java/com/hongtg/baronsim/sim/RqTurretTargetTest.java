@@ -28,7 +28,7 @@ class RqTurretTargetTest {
 
     private CombatState state(List<Turret> turrets, RqTurretPosition position) {
         return new CombatState(1_000_000, new NoDummyTankingStrategy(turrets, heimer, position), heimer, 0.5,
-                new TurretKits(0, 3, 20), turrets, new TurretSpec(775, 80, 0, 0, 1.0, 1.0, 3));
+                new TurretKits(0, 3, 20), turrets, new TurretSpec(775, 80, 0, 0, 1.0, 1.0, 3), new ArrayList<>());
     }
 
     private void kill(Turret t) {

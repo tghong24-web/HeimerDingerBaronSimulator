@@ -1,5 +1,6 @@
 package com.hongtg.baronsim.sim;
 
+import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -48,7 +49,7 @@ class NoDummyTankingTest {
 
     /** 바론 평타만 timeLimit초까지 돌린다 (하이머 스킬, 포탑 공격 없음). */
     private void runBaronAttacks(List<Turret> turrets, double timeLimit) {
-        CombatState state = new CombatState(1_000_000, new NoDummyTankingStrategy(turrets, heimer, RqTurretPosition.FRONT), heimer, 0.5, new TurretKits(0, 3, 20), turrets, new TurretSpec(500, 30, 0, 0, 1.0, 1.0, 3));
+        CombatState state = new CombatState(1_000_000, new NoDummyTankingStrategy(turrets, heimer, RqTurretPosition.FRONT), heimer, 0.5, new TurretKits(0, 3, 20), turrets, new TurretSpec(500, 30, 0, 0, 1.0, 1.0, 3), new ArrayList<>());
         state.schedule(new BaronAttackEvent(0, BARON_AD, INTERVAL));
         while (state.hasEvents()) {
             Event e = state.nextEvent();

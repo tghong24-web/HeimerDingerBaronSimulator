@@ -51,11 +51,11 @@ class ItemSimulationTest {
     }
 
     @Test
-    void blackfireHasteAndAmpWorkLikeBonusStats() {
-        // 어둠불꽃 횃불(AP 80, 가속 20, 주문력 4% 증폭) + 추가 AP 220 → (300) × 1.04 = AP 312, 가속 20
-        // 가속 20이면 키트 충전이 20 × 100/120 ≈ 16.7초라 남은 충전 시간은 그 이하로 넣는다
-        SimulatorResult items = run(13, 5, new Build(List.of("blackfire"), 220, 0, 0, 0, 0), RoleQuest.NONE, true, 10);
-        SimulatorResult bonus = run(13, 5, new Build(List.of(), 312, 20, 0, 0, 0), RoleQuest.NONE, true, 10);
+    void itemHasteWorksLikeBonusHaste() {
+        // 사라진 양피지(AP 40, 가속 10) + 추가 AP 260 = 추가 AP 300, 가속 10 (화상 없는 아이템으로 비교)
+        // 가속 10이면 키트 충전이 20 × 100/110 ≈ 18.2초라 남은 충전 시간은 그 이하로 넣는다
+        SimulatorResult items = run(13, 5, new Build(List.of("lostchapter"), 260, 0, 0, 0, 0), RoleQuest.NONE, true, 10);
+        SimulatorResult bonus = run(13, 5, new Build(List.of(), 300, 10, 0, 0, 0), RoleQuest.NONE, true, 10);
 
         assertEquals(bonus.killTime(), items.killTime(), 1e-9);
     }

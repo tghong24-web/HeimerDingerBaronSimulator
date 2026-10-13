@@ -27,8 +27,11 @@ public class CombatState {
     private double qReadyTime = 0;
     private final TurretSpec turretSpec;
     private Turret rQTurret = null;
+    private final List<BurnSpec> burnDamage;
+    private final Map<DamageSource, Double> burnUntil = new EnumMap<>(DamageSource.class);;
+    private final Map<DamageSource, Boolean> burning = new EnumMap<>(DamageSource.class);;
 
-    public CombatState(double baronStartHealth, TankingStrategy strategy, Heimer heimer, double gazeReduction, TurretKits turretKits, List<Turret> turrets, TurretSpec turretSpec){
+    public CombatState(double baronStartHealth, TankingStrategy strategy, Heimer heimer, double gazeReduction, TurretKits turretKits, List<Turret> turrets, TurretSpec turretSpec, List<BurnSpec> burnDamage){
         this.baronHealth = baronStartHealth;
         this.strategy = strategy;
         this.heimer = heimer;
@@ -36,6 +39,7 @@ public class CombatState {
         this.turretKits = turretKits;
         this.turrets = turrets;
         this.turretSpec = turretSpec;
+        this.burnDamage = burnDamage;
         queue = new PriorityQueue<>(Comparator.comparingDouble((Scheduled s) -> s.event().time()).thenComparingLong(Scheduled::seq));
     }
 
@@ -73,6 +77,26 @@ public class CombatState {
         if (gazeLoss > 0) {
             gazeLossBySource.merge(source, gazeLoss, Double::sum);
         }
+    }
+
+    public void refreshBurns(double time) {
+        for (BurnSpec spec : burnDamage) {
+            burnUntil.put(spec.source(), time + 3);
+
+            if (!burning.getOrDefault(spec.source(), false)){
+                burning.put(spec.source(), true);        
+                schedule(new BurnTickEvent(time + 0.5, spec));
+            }
+        }
+        
+    }
+
+    public void stopBurning(DamageSource source) {
+        burning.put(source, false);
+    }
+    
+    public double burnUntil(DamageSource source) {
+        return burnUntil.getOrDefault(source, 0.0);
     }
     
     public List<Turret> turrets() {
