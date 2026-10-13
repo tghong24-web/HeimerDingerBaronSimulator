@@ -58,14 +58,22 @@ public class Simulator {
             strategy = new NoDummyTankingStrategy(turrets, heimer);
         }
 
+        TurretSpec turretSpec = new TurretSpec(turretHp, turretArmor, finalQDamage, shotInterval, turret.cooldownSeconds(), turret.maxTurrets());
+
         // 입력한 전략에 맞는 state 생성
-        CombatState state = new CombatState(baron.health(), strategy, heimer, baronData.gaze().damageReduction(), turretKits, turrets);
+        CombatState state = new CombatState(baron.health(), strategy, heimer, baronData.gaze().damageReduction(), turretKits, turrets, turretSpec);
         
         if(!turretKits.isFull()) {
             turretKits.setRecharging(true);
             state.schedule(new KitRechargeEvent(input.restKitChargeSecond()));
         }
+        
+        if (turretKits.hasKit() && input.turretCount() != turret.maxTurrets()){
+            // 첫 포탑 설치 예약
+            state.schedule(new TurretPlaceEvent(0, turretSpec));
+        }
 
+        // 이미 깔려있던 포탑들 공격 시작
         for (Turret t : turrets) {
             state.schedule(new TurretAttackEvent(0, finalQDamage, shotInterval, t));
         }

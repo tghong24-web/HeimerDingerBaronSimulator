@@ -25,14 +25,16 @@ public class CombatState {
     private final TurretKits turretKits;
     private final List<Turret> turrets;
     private double qReadyTime = 0;
+    private final TurretSpec turretSpec;
 
-    public CombatState(double baronStartHealth, TankingStrategy strategy, Heimer heimer, double gazeReduction, TurretKits turretKits, List<Turret> turrets){
+    public CombatState(double baronStartHealth, TankingStrategy strategy, Heimer heimer, double gazeReduction, TurretKits turretKits, List<Turret> turrets, TurretSpec turretSpec){
         this.baronHealth = baronStartHealth;
         this.strategy = strategy;
         this.heimer = heimer;
         this.gazeReduction = gazeReduction;
         this.turretKits = turretKits;
         this.turrets = turrets;
+        this.turretSpec = turretSpec;
         queue = new PriorityQueue<>(Comparator.comparingDouble((Scheduled s) -> s.event().time()).thenComparingLong(Scheduled::seq));
     }
 
@@ -74,7 +76,11 @@ public class CombatState {
 
     public TurretKits turretKits() {
         return turretKits;
-    } 
+    }
+    
+    public TurretSpec turretSpec() {
+        return turretSpec;
+    }
     
     public Map<DamageSource, Double> damageBySource() {
         return Map.copyOf(damageBySource);
