@@ -163,6 +163,28 @@ class ItemDataTest {
     }
 
     @Test
+    void burnRule() {
+        assertEquals(3, data.burn().durationSeconds(), 1e-9);
+        assertEquals(0.5, data.burn().tickSeconds(), 1e-9);
+    }
+
+    @Test
+    void burnItems() {
+        // 운명의 재: (5 + 몬스터 15) ÷ 2 = 10
+        assertEquals(10, data.item("fatedashes").burnPerTick(), 1e-9);
+        assertEquals(0, data.item("fatedashes").burnApRatioPerTick(), 1e-9);
+        // 어둠불꽃 횃불: (20 + 몬스터 20) ÷ 2 = 20, 주문력 2% ÷ 2 = 0.01
+        assertEquals(20, data.item("blackfire").burnPerTick(), 1e-9);
+        assertEquals(0.01, data.item("blackfire").burnApRatioPerTick(), 1e-9);
+        // 리안드리: 에픽 몬스터에게 틱당 20 고정, 주문력 계수 없음
+        assertEquals(20, data.item("liandrys").burnPerTick(), 1e-9);
+        assertEquals(0, data.item("liandrys").burnApRatioPerTick(), 1e-9);
+
+        assertTrue(data.item("liandrys").hasBurn());
+        assertFalse(data.item("rabadons").hasBurn());
+    }
+
+    @Test
     void unknownIdIsRejected() {
         assertThrows(IllegalArgumentException.class, () -> data.item("ludens"));
     }
